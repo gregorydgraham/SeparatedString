@@ -5,6 +5,23 @@
     <artifactId>SeparatedString</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+	<licenses>
+		<license>
+			<name>Commercial License</name>
+			<comments>Commercial licenses and support are available. Check https://dbvolution.com/licensing.html for details.</comments>
+		</license>
+		<license>
+			<name>Non-commercial License</name>
+			<url>https://dbvolution.com/noncommercial_license.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:git:https://github.com/gregorydgraham/SeparatedString.git</connection>
+		<developerConnection>scm:git:https://github.com/gregorydgraham/SeparatedString.git</developerConnection>
+		<url>https://github.com/gregorydgraham/SeparatedString.git</url>
+		<tag>HEAD</tag>
+	</scm>
     <dependencies>
         <dependency>
             <groupId>org.hamcrest</groupId>
