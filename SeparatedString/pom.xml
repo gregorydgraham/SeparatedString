@@ -150,7 +150,9 @@
 				<version>2.5.3</version>
 				<configuration>
 					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<!-- sonatype prefer their own release profile -->
 					<useReleaseProfile>false</useReleaseProfile>
+					<!-- release profile as defined by Sonatype -->
 					<releaseProfiles>release</releaseProfiles>
 					<goals>deploy</goals>
 				</configuration>
