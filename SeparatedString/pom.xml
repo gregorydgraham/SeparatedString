@@ -2,9 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nz.co.gregs</groupId>
-	<artifactId>SeparatedString</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<artifactId>separatedstring</artifactId>
+	<version>0.9-SNAPSHOT</version>
 	<packaging>jar</packaging>
+	<name>SeparatedString</name>
+	<description>A fluent API to generate and parse CSV amd bracketed lists</description>
+	<url>https://github.com/gregorydgraham/SeparatedString</url>
 	<licenses>
 		<license>
 			<name>Commercial License</name>
@@ -16,12 +19,27 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	
+	
+	<developers>
+		<developer>
+			<name>Gregory Graham</name>
+			<email>info@gregs.co.nz</email>
+			<url>http://gregs.co.nz</url>
+			<timezone>+12</timezone>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
+	</developers>
+
 	<scm>
+		<url>https://github.com/gregorydgraham/SeparateString</url>
 		<connection>scm:git:https://github.com/gregorydgraham/SeparatedString.git</connection>
 		<developerConnection>scm:git:https://github.com/gregorydgraham/SeparatedString.git</developerConnection>
-		<url>https://github.com/gregorydgraham/SeparatedString.git</url>
-		<tag>SeparatedString-1.0</tag>
+		<tag>HEAD</tag>
 	</scm>
+		
 	<dependencies>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
