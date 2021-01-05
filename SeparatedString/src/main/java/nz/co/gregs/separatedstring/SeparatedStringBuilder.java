@@ -35,6 +35,31 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Simple access to creating a string of a variety of strings separated by a
+ * common character or sequence.
+ *
+ * <p>
+ * A common pattern is to add string elements to a longer string with a format
+ * similar to: prefix|element1|separator|element2|suffix. For instance a file
+ * path has prefix "/", separator "/", and suffix "". This class allows for
+ * convenient object-oriented processing of this pattern.
+ *
+ * <p>
+ * Advanced features allow for proper CSV formatting including quoting and
+ * escaping.
+ *
+ * <p>
+ * All values are strings, not characters, so complex output can be generated: a
+ * WHEN clause in SQL would be
+ * <p>
+ * <code>SeparatedStringBulder.startsWith("WHEN").separatedBy(" AND ").addAll(allWhenClausesList).endsWith(groupByClauseString).toString();</code>
+ *
+ * <p>
+ * The default separator is a space (" "). All other defaults are empty.
+ *
+ * <p>
+ * Supports string separator, prefix, suffix, quoting, before quote, after
+ * quote, escaping, maps, and is a fluent API.
  *
  * @author gregorygraham
  */
@@ -51,7 +76,8 @@ public class SeparatedStringBuilder {
 	 * SeparatedString.byCommas().startsWith("LIST=").addAll("1","2","3") will
 	 * produce "LIST=1,2,3"
 	 *
-	 * @param precedingString
+	 * @param precedingString the string to include at the very beginning of the
+	 * generated separated string
 	 * @return a SeparatedString that will have precedingString at the beginning
 	 * of the output
 	 */
@@ -63,10 +89,12 @@ public class SeparatedStringBuilder {
 	 * Creates a SeparatedString for the map's keys and values.
 	 *
 	 * <p>
-	 * Remember to set the {@link #getKeyValueSeparator() key-value separator}
+	 * Remember to set the {@link SeparatedString#getKeyValueSeparator() key-value separator}
 	 *
-	 * @param nameValuePairs
-	 * @param nameValueSeparator
+	 * @param nameValuePairs a collection of name/value pairs to be included in
+	 * the separated string
+	 * @param nameValueSeparator the character (like "=" or ":") used to separate
+	 * the name and value
 	 * @return a SeparatedString
 	 */
 	public static SeparatedString of(Map<String, String> nameValuePairs, String nameValueSeparator) {
@@ -89,7 +117,7 @@ public class SeparatedStringBuilder {
 	 * <p>
 	 * SeparatedString.of("1","2","3").toString() will produce "1 2 3".
 	 *
-	 * @param allStrings
+	 * @param allStrings a list of strings to include within the separated string
 	 * @return SeparatedString
 	 */
 	public static SeparatedString of(String... allStrings) {
@@ -102,7 +130,7 @@ public class SeparatedStringBuilder {
 	 * <p>
 	 * SeparatedString.of("1","2","3").toString() will produce "1 2 3".
 	 *
-	 * @param allStrings
+	 * @param allStrings a list of strings to include within the separated string
 	 * @return SeparatedString
 	 */
 	public static SeparatedString of(List<String> allStrings) {
@@ -122,8 +150,9 @@ public class SeparatedStringBuilder {
 	 * SeparatedString.forSeparator(",").addAll("1","2","3").toString() will
 	 * produce "1,2,3"
 	 *
-	 * @param separator
-	 * @return
+	 * @param separator the characters, like ", ", used to separate that values
+	 * within the separated string
+	 * @return a SeparatedString
 	 */
 	public static SeparatedString forSeparator(String separator) {
 		return new SeparatedString().separatedBy(separator);
