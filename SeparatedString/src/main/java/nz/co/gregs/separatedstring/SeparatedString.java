@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
  * All values are strings, not characters, so complex output can be generated: a
  * WHEN clause in SQL would be
  * <p>
- * <code>SeparatedString.startsWith("WHEN").separatedBy(" AND ").addAll(allWhenClausesList).endsWith(groupByClauseString).toString();</code>
+ * <code>SeparatedStringBulder.startsWith("WHEN").separatedBy(" AND ").addAll(allWhenClausesList).endsWith(groupByClauseString).toString();</code>
  *
  * <p>
  * The default separator is a space (" "). All other defaults are empty.
@@ -81,150 +81,15 @@ public class SeparatedString {
 	private String keyValueSeparator = "";
 	private boolean closedLoop = false;
 
-	private SeparatedString() {
+	SeparatedString() {
 	}
 
-	/**
-	 * Creates a new SeparatedString that starts with provided value.
-	 *
-	 * <p>
-	 * This adds a prefix to the separated string result. For instance
-	 * SeparatedString.byCommas().startsWith("LIST=").addAll("1","2","3") will
-	 * produce "LIST=1,2,3"
-	 *
-	 * @param precedingString
-	 * @return a SeparatedString that will have precedingString at the beginning
-	 * of the output
-	 */
-	public static SeparatedString startsWith(String precedingString) {
-		return new SeparatedString().withPrefix(precedingString);
-	}
-
-	/**
-	 * Creates a SeparatedString for the map's keys and values.
-	 *
-	 * <p>
-	 * Remember to set the {@link #getKeyValueSeparator() key-value separator}
-	 *
-	 * @param nameValuePairs
-	 * @param nameValueSeparator
-	 * @return a SeparatedString
-	 */
-	public static SeparatedString of(Map<String, String> nameValuePairs, String nameValueSeparator) {
-		ArrayList<String> list = new ArrayList<>();
-		nameValuePairs.entrySet().forEach((entry) -> {
-			String key = entry.getKey();
-			String val = entry.getValue();
-			list.add(key + nameValueSeparator + val);
-		});
-		if (list.isEmpty()) {
-			return new SeparatedString();
-		} else {
-			return new SeparatedString().addAll(list);
-		}
-	}
-
-	/**
-	 * Creates a separated string with the provided values.
-	 *
-	 * <p>
-	 * SeparatedString.of("1","2","3").toString() will produce "1 2 3".
-	 *
-	 * @param allStrings
-	 * @return SeparatedString
-	 */
-	public static SeparatedString of(String... allStrings) {
-		return new SeparatedString().addAll(allStrings);
-	}
-
-	/**
-	 * Creates a separated string with the provided values.
-	 *
-	 * <p>
-	 * SeparatedString.of("1","2","3").toString() will produce "1 2 3".
-	 *
-	 * @param allStrings
-	 * @return SeparatedString
-	 */
-	public static SeparatedString of(List<String> allStrings) {
-		final SeparatedString separatedString = new SeparatedString();
-		if (allStrings != null) {
-			final String[] toArray = allStrings.toArray(new String[]{});
-			return separatedString.addAll(toArray);
-		}
-		return separatedString;
-	}
-
-	/**
-	 * Creates a SeparatedString that will use the provided separator between
-	 * values.
-	 *
-	 * <p>
-	 * SeparatedString.forSeparator(",").addAll("1","2","3").toString() will
-	 * produce "1,2,3"
-	 *
-	 * @param separator
-	 * @return
-	 */
-	public static SeparatedString forSeparator(String separator) {
-		return new SeparatedString().separatedBy(separator);
-	}
 
 	public SeparatedString separatedBy(String separator) {
 		if (separator != null && !separator.isEmpty()) {
 			this.separator = separator;
 		}
 		return this;
-	}
-
-	public static SeparatedString bySpaces() {
-		return SeparatedString.forSeparator(" ");
-	}
-
-	public static SeparatedString byCommas() {
-		return SeparatedString.forSeparator(",");
-	}
-
-	public static SeparatedString byCommaSpace() {
-		return SeparatedString.forSeparator(", ");
-	}
-
-	public static SeparatedString byCommasWithQuotedTermsAndBackslashEscape() {
-		return byCommas()
-				.withThisBeforeEachTerm("\"")
-				.withThisAfterEachTerm("\"")
-				.withEscapeChar("\\");
-	}
-
-	public static SeparatedString byCommasWithQuotedTermsAndDoubleBackslashEscape() {
-		return byCommas()
-				.withThisBeforeEachTerm("\"")
-				.withThisAfterEachTerm("\"")
-				.withEscapeChar("\\\\");
-	}
-
-	public static SeparatedString byTabs() {
-		return SeparatedString.forSeparator("\t");
-	}
-
-	public static SeparatedString byLines() {
-		return SeparatedString.forSeparator("\n");
-	}
-
-	public static SeparatedString spaceSeparated() {
-		return SeparatedString.bySpaces();
-	}
-
-	public static SeparatedString commaSeparated() {
-		return SeparatedString.byCommas();
-	}
-
-	public static SeparatedString tabSeparated() {
-		return SeparatedString.byTabs();
-	}
-
-	public static SeparatedString lineSeparated() {
-		return SeparatedString.byLines();
 	}
 
 	public SeparatedString withEscapeChar(String esc) {

@@ -32,6 +32,7 @@ package nz.co.gregs.separatedstring.api;
 
 import java.util.Map;
 import nz.co.gregs.separatedstring.SeparatedString;
+import nz.co.gregs.separatedstring.SeparatedStringBuilder;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class SeparatedStringTest {
 
 	@Test
 	public void testSimpleParsing() {
-		final SeparatedString sepString = SeparatedString.byCommas();
+		final SeparatedString sepString = SeparatedStringBuilder.byCommas();
 		sepString.addAll("aaa", "bbb", "ccc");
 		final String encoded = sepString.toString();
 		assertThat(encoded, is("aaa,bbb,ccc"));
@@ -61,7 +62,7 @@ public class SeparatedStringTest {
 
 	@Test
 	public void testCommaSpaceParsing() {
-		final SeparatedString sepString = SeparatedString.byCommaSpace();
+		final SeparatedString sepString = SeparatedStringBuilder.byCommaSpace();
 		sepString.addAll("aaa", "bbb", "ccc");
 		final String encoded = sepString.toString();
 		assertThat(encoded, is("aaa, bbb, ccc"));
@@ -76,7 +77,7 @@ public class SeparatedStringTest {
 	@Test
 	public void testQuotedParsing() {
 		// 1000,117090058,117970084,"170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze",Flensburg-Weiche - Flensb. Gr
-		String[] parsed = SeparatedString
+		String[] parsed = SeparatedStringBuilder
 				.byCommasWithQuotedTermsAndBackslashEscape()
 				.parseToArray("1000,117090058,117970084,\"170,9 + 58\",\"179,7 + 84\",\"Flensburg Weiche, W 203 - Flensburg Grenze\",Flensburg-Weiche - Flensb. Gr");
 //		Arrays.asList(parsed).stream().forEach((x) -> System.out.println(x));
@@ -92,7 +93,7 @@ public class SeparatedStringTest {
 
 	@Test
 	public void testCustomParsing() {
-		final SeparatedString sepString = SeparatedString
+		final SeparatedString sepString = SeparatedStringBuilder
 				.byTabs()
 				.withThisBeforeEachTerm("~\"")
 				.withThisAfterEachTerm("\"~")
@@ -117,7 +118,7 @@ public class SeparatedStringTest {
 
 	@Test
 	public void testCustomParsingWithRegexCharacters() {
-		final SeparatedString sepString = SeparatedString
+		final SeparatedString sepString = SeparatedStringBuilder
 				.byTabs()
 				.withThisBeforeEachTerm("+")
 				.withThisAfterEachTerm("+")
@@ -142,7 +143,7 @@ public class SeparatedStringTest {
 
 	@Test
 	public void testWithWrappingCustomParsing() {
-		final SeparatedString sepString = SeparatedString
+		final SeparatedString sepString = SeparatedStringBuilder
 				.byTabs()
 				.withThisBeforeEachTerm("~\"")
 				.withThisAfterEachTerm("\"~")
@@ -169,7 +170,7 @@ public class SeparatedStringTest {
 
 	@Test
 	public void testEscapeParsing() {
-		String[] parsed = SeparatedString
+		String[] parsed = SeparatedStringBuilder
 				.byCommasWithQuotedTermsAndBackslashEscape()
 				.parseToArray("aaa,\"b\\\"b\\\"b\",c\\,cc");
 		assertThat(parsed.length, is(3));
@@ -180,7 +181,7 @@ public class SeparatedStringTest {
 
 	@Test
 	public void testMapParsing() {
-		Map<String, String> parsed = SeparatedString
+		Map<String, String> parsed = SeparatedStringBuilder
 				.byCommasWithQuotedTermsAndBackslashEscape()
 				.parseToMap("left=10px,right=20em,border=3");
 		assertThat(parsed.size(), is(3));
@@ -188,7 +189,7 @@ public class SeparatedStringTest {
 		assertThat(parsed.get("right=20em"), isEmptyString());
 		assertThat(parsed.get("border=3"), isEmptyString());
 		
-		parsed = SeparatedString
+		parsed = SeparatedStringBuilder
 				.byCommasWithQuotedTermsAndBackslashEscape()
 				.withKeyValueSeparator("=")
 				.parseToMap("left=10px,right=20em,border=3");
