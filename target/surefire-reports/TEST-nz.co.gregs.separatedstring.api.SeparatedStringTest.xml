@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite tests="8" failures="0" name="nz.co.gregs.separatedstring.api.SeparatedStringTest" time="0.351" errors="0" skipped="0">
+<testsuite tests="8" failures="0" name="nz.co.gregs.separatedstring.api.SeparatedStringTest" time="0.26" errors="0" skipped="0">
   <properties>
     <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
     <property name="java.vm.version" value="10.0.2+13"/>
     <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk-10.0.2.jdk/Contents/Home/lib"/>
     <property name="gopherProxySet" value="false"/>
-    <property name="maven.multiModuleProjectDirectory" value="/Users/gregorygraham/Projects/SeparatedString/SeparatedString/SeparatedString"/>
+    <property name="maven.multiModuleProjectDirectory" value="/Users/gregorygraham/Projects/SeparatedString/SeparatedString"/>
     <property name="java.vm.vendor" value="&quot;Oracle Corporation&quot;"/>
     <property name="java.vendor.url" value="http://java.oracle.com/"/>
     <property name="guice.disable.misplaced.annotation.check" value="true"/>
@@ -17,7 +17,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="test" value="${packageClassName}"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="user.dir" value="/Users/gregorygraham/Projects/SeparatedString/SeparatedString/SeparatedString"/>
+    <property name="user.dir" value="/Users/gregorygraham/Projects/SeparatedString/SeparatedString"/>
     <property name="java.vm.compressedOopsMode" value="Zero based"/>
     <property name="java.runtime.version" value="10.0.2+13"/>
     <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
@@ -68,12 +68,12 @@
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testMapParsing" time="0.066"/>
-  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testSimpleParsing" time="0.209"/>
-  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testWithWrappingCustomParsing" time="0.067"/>
-  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testQuotedParsing" time="0.003"/>
-  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testCustomParsingWithRegexCharacters" time="0.003"/>
+  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testMapParsing" time="0.044"/>
+  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testSimpleParsing" time="0.186"/>
+  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testWithWrappingCustomParsing" time="0.024"/>
+  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testQuotedParsing" time="0.001"/>
+  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testCustomParsingWithRegexCharacters" time="0.001"/>
   <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testCommaSpaceParsing" time="0.001"/>
   <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testEscapeParsing" time="0.001"/>
-  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testCustomParsing" time="0.001"/>
+  <testcase classname="nz.co.gregs.separatedstring.api.SeparatedStringTest" name="testCustomParsing" time="0.002"/>
 </testsuite>
