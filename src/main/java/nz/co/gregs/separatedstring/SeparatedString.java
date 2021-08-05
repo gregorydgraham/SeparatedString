@@ -80,10 +80,19 @@ public class SeparatedString {
 	private String useWhenEmpty = "";
 	private String keyValueSeparator = "";
 	private boolean closedLoop = false;
+	private boolean trimBlanks = false;
 
 	SeparatedString() {
 	}
 
+	public boolean isTrimBlanks() {
+		return trimBlanks;
+	}
+
+	public SeparatedString trimBlanks() {
+		this.trimBlanks = true;
+		return this;
+	}
 
 	public SeparatedString separatedBy(String separator) {
 		if (separator != null && !separator.isEmpty()) {
@@ -138,20 +147,23 @@ public class SeparatedString {
 			String currentElement = "";
 			String firstElement = null;
 			for (String element : allTheElements) {
-				String str = element;
-				if (hasEscapeChar()) {
-					str = str.replace(escChrSequence, escChrEscSequence);
-					str = str.replace(wrapBeforeSequence, wrapBeforeEscSequence);
-					if (hasAsymetricWrapping()) {
-						str = str.replace(wrapAfterSequence, wrapAfterEscSequence);
+				if (trimBlanks && element.isEmpty()) {
+				} else {
+					String str = element;
+					if (hasEscapeChar()) {
+						str = str.replace(escChrSequence, escChrEscSequence);
+						str = str.replace(wrapBeforeSequence, wrapBeforeEscSequence);
+						if (hasAsymetricWrapping()) {
+							str = str.replace(wrapAfterSequence, wrapAfterEscSequence);
+						}
 					}
+					currentElement = getWrapBefore() + str + getWrapAfter();
+					if (firstElement == null) {
+						firstElement = currentElement;
+					}
+					strs.append(sep).append(currentElement);
+					sep = this.getSeparator();
 				}
-				currentElement = getWrapBefore() + str + getWrapAfter();
-				if (firstElement == null) {
-					firstElement = currentElement;
-				}
-				strs.append(sep).append(currentElement);
-				sep = this.getSeparator();
 			}
 			if (this.closedLoop && firstElement != null && !firstElement.equals(currentElement)) {
 				strs.append(sep).append(firstElement);
