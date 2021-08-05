@@ -247,6 +247,11 @@ public class SeparatedString {
 		return this;
 	}
 
+	public SeparatedString add(Object string) {
+		getStrings().add(string.toString());
+		return this;
+	}
+
 	public SeparatedString containing(String... strings) {
 		return addAll(strings);
 	}
