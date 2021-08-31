@@ -115,6 +115,15 @@ public class SeparatedString {
 		return parseToList(str);
 	}
 
+	/**
+	 * Encodes the contents as per the setup of the SeparatedString.
+	 *
+	 * <p>
+	 * for instance a SeparatedString.commaSeparated() with values 1, 2, and 3
+	 * with return "1,2,3".</p>
+	 *
+	 * @return returns the SeparatedString's contents encoded as a String
+	 */
 	public String encode() {
 		return toString();
 	}
