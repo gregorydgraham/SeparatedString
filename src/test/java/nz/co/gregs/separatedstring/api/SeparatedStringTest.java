@@ -99,7 +99,7 @@ public class SeparatedStringTest {
 				.withThisAfterEachTerm("\"~")
 				.withEscapeChar("==");
 // 1000,117090058,117970084,"170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze",Flensburg-Weiche - Flensb. Gr
-		sepString.addAll("1000","117090058","117970084","170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze","Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
+		sepString.addAll("1000", "117090058", "117970084", "170,9 + 58", "179,7 + 84", "Flensburg Weiche, W 203 - Flensburg Grenze", "Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
 		final String encoded = sepString.toString();
 		assertThat(encoded, is("~\"1000\"~\t~\"117090058\"~\t~\"117970084\"~\t~\"170,9 + 58\"~\t~\"179,7 + 84\"~\t~\"Flensburg Weiche, W 203 - Flensburg Grenze\"~\t~\"Flensburg-Weiche - Flensb. Gr\"~\t~\"Albert \"The Pain\" Hallsburg\"~"));
 
@@ -117,6 +117,68 @@ public class SeparatedStringTest {
 	}
 
 	@Test
+	public void testBackslashEscapeChar() {
+		final SeparatedString sepString = SeparatedStringBuilder
+				.byCommaSpace()
+				.withThisBeforeEachTerm("1")
+				.withThisAfterEachTerm("8")
+				.withEscapeChar("\\");
+// 1000,117090058,117970084,"170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze",Flensburg-Weiche - Flensb. Gr
+		sepString.addAll("10\\00", "117090058", "117970084", "170,9 + 58", "179,7 + 84", "Flensburg Weiche, W 203 - Flensburg Grenze", "Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
+		final String encoded = sepString.toString();
+		assertThat(encoded, is("1\\10\\\\008, 1\\1\\1709005\\88, 1\\1\\179700\\848, 1\\170,9 + 5\\88, 1\\179,7 + \\848, 1Flensburg Weiche\\, W 203 - Flensburg Grenze8, 1Flensburg-Weiche - Flensb. Gr8, 1Albert \"The Pain\" Hallsburg8"));
+
+		String[] parsed = sepString.parseToArray(encoded);
+		assertThat(parsed.length, is(8));
+		assertThat(parsed[0], is("10\\00"));
+		assertThat(parsed[1], is("117090058"));
+		assertThat(parsed[2], is("117970084"));
+		assertThat(parsed[3], is("170,9 + 58"));
+		assertThat(parsed[4], is("179,7 + 84"));
+		assertThat(parsed[5], is("Flensburg Weiche, W 203 - Flensburg Grenze"));
+		assertThat(parsed[6], is("Flensburg-Weiche - Flensb. Gr"));
+		assertThat(parsed[7], is("Albert \"The Pain\" Hallsburg"));
+	}
+
+	@Test
+	public void testCanDecodeNestedSeparatedString() {
+		final SeparatedString sepString = SeparatedStringBuilder
+				.byCommaSpace()
+				.withThisBeforeEachTerm("1")
+				.withThisAfterEachTerm("8")
+				.withEscapeChar("\\");
+// 1000,117090058,117970084,"170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze",Flensburg-Weiche - Flensb. Gr
+		sepString.addAll("10\\00", "117090058", "117970084", "170,9 + 58", "179,7 + 84", "Flensburg Weiche, W 203 - Flensburg Grenze", "Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
+		final String encoded = sepString.toString();
+		assertThat(encoded, is("1\\10\\\\008, 1\\1\\1709005\\88, 1\\1\\179700\\848, 1\\170,9 + 5\\88, 1\\179,7 + \\848, 1Flensburg Weiche\\, W 203 - Flensburg Grenze8, 1Flensburg-Weiche - Flensb. Gr8, 1Albert \"The Pain\" Hallsburg8"));
+
+		SeparatedString withNesting = SeparatedStringBuilder
+				.byCommaSpace()
+				.withThisBeforeEachTerm("1")
+				.withThisAfterEachTerm("8")
+				.withEscapeChar("\\");
+		SeparatedString nested = withNesting.addAll("fivefivefive", encoded, "sixsixsix");
+		final String nestedEncoded = nested.encode();
+		assertThat(nestedEncoded, is("1fivefivefive8, 1\\1\\\\\\10\\\\\\\\00\\8\\, \\1\\\\\\1\\\\\\1709005\\\\\\8\\8\\, \\1\\\\\\1\\\\\\179700\\\\\\84\\8\\, \\1\\\\\\170,9 + 5\\\\\\8\\8\\, \\1\\\\\\179,7 + \\\\\\84\\8\\, \\1Flensburg Weiche\\\\\\, W 203 - Flensburg Grenze\\8\\, \\1Flensburg-Weiche - Flensb. Gr\\8\\, \\1Albert \"The Pain\" Hallsburg\\88, 1sixsixsix8"));
+		final String[] nestedArray = nested.parseToArray(nestedEncoded);
+		assertThat(nestedArray.length, is(3));
+		assertThat(nestedArray[0], is("fivefivefive"));
+		assertThat(nestedArray[1], is(encoded));
+		assertThat(nestedArray[2], is("sixsixsix"));
+
+		String[] parsed = sepString.parseToArray(nestedArray[1]);
+		assertThat(parsed.length, is(8));
+		assertThat(parsed[0], is("10\\00"));
+		assertThat(parsed[1], is("117090058"));
+		assertThat(parsed[2], is("117970084"));
+		assertThat(parsed[3], is("170,9 + 58"));
+		assertThat(parsed[4], is("179,7 + 84"));
+		assertThat(parsed[5], is("Flensburg Weiche, W 203 - Flensburg Grenze"));
+		assertThat(parsed[6], is("Flensburg-Weiche - Flensb. Gr"));
+		assertThat(parsed[7], is("Albert \"The Pain\" Hallsburg"));
+	}
+
+	@Test
 	public void testCustomParsingWithRegexCharacters() {
 		final SeparatedString sepString = SeparatedStringBuilder
 				.byTabs()
@@ -124,7 +186,7 @@ public class SeparatedStringTest {
 				.withThisAfterEachTerm("+")
 				.withEscapeChar("||");
 // 1000,117090058,117970084,"170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze",Flensburg-Weiche - Flensb. Gr
-		sepString.addAll("1000","117090058","117970084","170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze","Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
+		sepString.addAll("1000", "117090058", "117970084", "170,9 + 58", "179,7 + 84", "Flensburg Weiche, W 203 - Flensburg Grenze", "Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
 		final String encoded = sepString.toString();
 		assertThat(encoded, is("+1000+\t+117090058+\t+117970084+\t+170,9 ||+ 58+\t+179,7 ||+ 84+\t+Flensburg Weiche, W 203 - Flensburg Grenze+\t+Flensburg-Weiche - Flensb. Gr+\t+Albert \"The Pain\" Hallsburg+"));
 
@@ -151,7 +213,7 @@ public class SeparatedStringTest {
 				.withPrefix("START")
 				.withSuffix("END");
 // 1000,117090058,117970084,"170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze",Flensburg-Weiche - Flensb. Gr
-		sepString.addAll("1000","117090058~\"","117970084","170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze","Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
+		sepString.addAll("1000", "117090058~\"", "117970084", "170,9 + 58", "179,7 + 84", "Flensburg Weiche, W 203 - Flensburg Grenze", "Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
 		final String encoded = sepString.encode();
 		assertThat(encoded, is("START~\"1000\"~\t~\"117090058==~\"\"~\t~\"117970084\"~\t~\"170,9 + 58\"~\t~\"179,7 + 84\"~\t~\"Flensburg Weiche, W 203 - Flensburg Grenze\"~\t~\"Flensburg-Weiche - Flensb. Gr\"~\t~\"Albert \"The Pain\" Hallsburg\"~END"));
 
@@ -188,7 +250,7 @@ public class SeparatedStringTest {
 		assertThat(parsed.get("left=10px"), isEmptyString());
 		assertThat(parsed.get("right=20em"), isEmptyString());
 		assertThat(parsed.get("border=3"), isEmptyString());
-		
+
 		parsed = SeparatedStringBuilder
 				.byCommasWithQuotedTermsAndBackslashEscape()
 				.withKeyValueSeparator("=")
