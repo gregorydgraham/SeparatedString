@@ -37,8 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import nz.co.gregs.regexi.*;
 
 /**
  * Simple access to creating a string of a variety of strings separated by a
@@ -159,36 +159,53 @@ public class SeparatedString {
 		}
 	}
 
+	private String escapeForRegex(String s) {
+		return s
+				.replace("\\", "\\\\")
+				.replace("+", "\\+")
+				.replace("{", "\\{")
+				.replace("}", "\\}")
+				.replace("(", "\\(")
+				.replace(")", "\\)")
+				.replace("[", "\\[")
+				.replace("]", "\\]")
+				.replace(".", "\\.")
+				.replace("?", "\\?")
+				.replace("*", "\\*")
+				.replace("^", "\\^")
+				.replace("$", "\\$")
+				.replace("|", "\\|");
+	}
+
 	private String escapeElement(String s) {
-		var partial = Regex.empty().namedCapture("special").orGroup();
+		String findPattern = "(?<special>(";
 		if (separator != null && !separator.isEmpty()) {
-			partial = partial.literal(separator);
+			findPattern += "(" + escapeForRegex(separator) + ")";
 		}
 		if (keyValueSeparator != null && !keyValueSeparator.isEmpty()) {
-			partial = partial.or().literal(keyValueSeparator);
+			findPattern += "|(" + escapeForRegex(keyValueSeparator) + ")";
 		}
 		if (prefix != null && !prefix.isEmpty()) {
-			partial = partial.or().literal(prefix);
+			findPattern += "|(" + escapeForRegex(prefix) + ")";
 		}
 		if (escapeChar != null && !escapeChar.isEmpty()) {
-			partial = partial.or().literal(escapeChar);
+			findPattern += "|(" + escapeForRegex(escapeChar) + ")";
 		}
 		if (suffix != null && !suffix.isEmpty()) {
-			partial = partial.or().literal(suffix);
+			findPattern += "|(" + escapeForRegex(suffix) + ")";
 		}
 		if (useWhenEmpty != null && !useWhenEmpty.isEmpty()) {
-			partial = partial.or().literal(useWhenEmpty);
+			findPattern += "|(" + escapeForRegex(useWhenEmpty) + ")";
 		}
 		if (wrapAfter != null && !wrapAfter.isEmpty()) {
-			partial = partial.or().literal(wrapAfter);
+			findPattern += "|(" + escapeForRegex(wrapAfter) + ")";
 		}
 		if (wrapBefore != null && !wrapBefore.isEmpty()) {
-			partial = partial.or().literal(wrapBefore);
+			findPattern += "|(" + escapeForRegex(wrapBefore) + ")";
 		}
-		Regex find = partial.endOrGroup().once().endNamedCapture().toRegex();
-		final RegexReplacement replacer = find.replaceWith().literal(escapeChar).namedReference("special");
-		String result = replacer.replaceAll(s);
-
+		findPattern += "){1})";
+		String replacePattern = "" + escapeForRegex(escapeChar) + "${special}";
+		String result = Pattern.compile(findPattern).matcher(s).replaceAll(replacePattern);
 		return result;
 	}
 
