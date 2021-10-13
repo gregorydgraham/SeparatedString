@@ -69,6 +69,56 @@ public class SeparatedStringBuilder {
 	}
 
 	/**
+	 * Creates a SeparatedString with recommended values for creating and
+	 * consuming a CSV file.
+	 *
+	 * <p>
+	 * Please note: CSV file implementations vary wildly and this SeparatedString
+	 * may not process for all CSV files, however it will produce reliable CSV
+	 * files and is recommended.</p>
+	 *
+	 * @return a SeparatedString
+	 */
+	public static SeparatedString csv() {
+		return SeparatedStringBuilder.byCommasWithQuotedTermsAndBackslashEscape().withKeyValueSeparator("=");
+	}
+
+	/**
+	 * Creates a SeparatedString with recommended values for creating and
+	 * consuming a TSV (tab separated value file) file
+	 *
+	 * <p>
+	 * Please note: TSV file implementations vary wildly and this SeparatedString
+	 * may not process for all TSV files, however it will produce reliable TSV
+	 * files and is recommended.</p>
+	 *
+	 * @return a SeparatedString
+	 */
+	public static SeparatedString tsv() {
+		return SeparatedStringBuilder.byTabs().withEachTermPrecededAndFollowedWith("\"").withEscapeChar("\\").withKeyValueSeparator("=");
+	}
+
+	/**
+	 * Creates a SeparatedString with recommended values for creating an HTML
+	 * ordered list.
+	 *
+	 * @return a SeparatedString
+	 */
+	public static SeparatedString htmlOrderedList() {
+		return SeparatedStringBuilder.forSeparator("\n").withThisBeforeEachTerm("<li>").withThisAfterEachTerm("</li>").withPrefix("<ol>").withSuffix("</ol>\n");
+	}
+
+	/**
+	 * Creates a SeparatedString with recommended values for creating an HTML
+	 * unordered list.
+	 *
+	 * @return a SeparatedString
+	 */
+	public static SeparatedString htmlUnorderedList() {
+		return SeparatedStringBuilder.forSeparator("\n").withThisBeforeEachTerm("<li>").withThisAfterEachTerm("</li>").withPrefix("<ul>").withSuffix("</ul>\n");
+	}
+
+	/**
 	 * Creates a new SeparatedString that starts with provided value.
 	 *
 	 * <p>
@@ -89,7 +139,8 @@ public class SeparatedStringBuilder {
 	 * Creates a SeparatedString for the map's keys and values.
 	 *
 	 * <p>
-	 * Remember to set the {@link SeparatedString#getKeyValueSeparator() key-value separator}
+	 * Remember to set the
+	 * {@link SeparatedString#getKeyValueSeparator() key-value separator}
 	 *
 	 * @param nameValuePairs a collection of name/value pairs to be included in
 	 * the separated string
