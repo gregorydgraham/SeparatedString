@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import nz.co.gregs.regexi.*;
 
 /**
  * Simple access to creating a string of a variety of strings separated by a
@@ -137,35 +138,12 @@ public class SeparatedString {
 			StringBuilder strs = new StringBuilder();
 			String sep = "";
 
-			// I prefer using matcher to avoid all the char sequence stuff
-			// but that prevents using pipes and such
-			final String escCharStr = getEscapeChar();
-			final CharSequence escChrSequence = escCharStr.subSequence(0, escCharStr.length());
-			final CharSequence escChrEscSequence = (escCharStr + escCharStr).subSequence(0, escCharStr.length() * 2);
-
-			final String wrapBeforeStr = getWrapBefore();
-			final String wrapBeforeEscStr = escCharStr + wrapBeforeStr;
-			final CharSequence wrapBeforeSequence = wrapBeforeStr.subSequence(0, wrapBeforeStr.length());
-			final CharSequence wrapBeforeEscSequence = wrapBeforeEscStr.subSequence(0, wrapBeforeEscStr.length());
-
-			final String wrapAfterStr = getWrapAfter();
-			final String wrapAfterEscStr = escCharStr + wrapAfterStr;
-			final CharSequence wrapAfterSequence = wrapAfterStr.subSequence(0, wrapAfterStr.length());
-			final CharSequence wrapAfterEscSequence = wrapAfterEscStr.subSequence(0, wrapAfterEscStr.length());
-
 			String currentElement = "";
 			String firstElement = null;
 			for (String element : allTheElements) {
 				if (trimBlanks && element.isEmpty()) {
 				} else {
-					String str = element;
-					if (hasEscapeChar()) {
-						str = str.replace(escChrSequence, escChrEscSequence);
-						str = str.replace(wrapBeforeSequence, wrapBeforeEscSequence);
-						if (hasAsymetricWrapping()) {
-							str = str.replace(wrapAfterSequence, wrapAfterEscSequence);
-						}
-					}
+					String str = escapeElement(element);
 					currentElement = getWrapBefore() + str + getWrapAfter();
 					if (firstElement == null) {
 						firstElement = currentElement;
@@ -179,6 +157,39 @@ public class SeparatedString {
 			}
 			return getPrefix() + strs.toString() + getSuffix();
 		}
+	}
+
+	private String escapeElement(String s) {
+		var partial = Regex.empty().namedCapture("special").orGroup();
+		if (separator != null && !separator.isEmpty()) {
+			partial = partial.literal(separator);
+		}
+		if (keyValueSeparator != null && !keyValueSeparator.isEmpty()) {
+			partial = partial.or().literal(keyValueSeparator);
+		}
+		if (prefix != null && !prefix.isEmpty()) {
+			partial = partial.or().literal(prefix);
+		}
+		if (escapeChar != null && !escapeChar.isEmpty()) {
+			partial = partial.or().literal(escapeChar);
+		}
+		if (suffix != null && !suffix.isEmpty()) {
+			partial = partial.or().literal(suffix);
+		}
+		if (useWhenEmpty != null && !useWhenEmpty.isEmpty()) {
+			partial = partial.or().literal(useWhenEmpty);
+		}
+		if (wrapAfter != null && !wrapAfter.isEmpty()) {
+			partial = partial.or().literal(wrapAfter);
+		}
+		if (wrapBefore != null && !wrapBefore.isEmpty()) {
+			partial = partial.or().literal(wrapBefore);
+		}
+		Regex find = partial.endOrGroup().once().endNamedCapture().toRegex();
+		final RegexReplacement replacer = find.replaceWith().literal(escapeChar).namedReference("special");
+		String result = replacer.replaceAll(s);
+
+		return result;
 	}
 
 	public boolean isNotEmpty() {
