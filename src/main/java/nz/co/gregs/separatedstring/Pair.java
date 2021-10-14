@@ -8,8 +8,10 @@ package nz.co.gregs.separatedstring;
 /**
  *
  * @author gregorygraham
+ * @param <KEY>
+ * @param <VALUE>
  */
-class Pair<KEY, VALUE> {
+public class Pair<KEY, VALUE>implements Comparable<KEY>{
 	
 	private final KEY key;
 	private final VALUE value;
@@ -29,6 +31,11 @@ class Pair<KEY, VALUE> {
 
 	public VALUE getValue() {
 		return value;
+	}
+
+	@Override
+	public int compareTo(KEY o) {
+		return key.toString().compareTo(o.toString());
 	}
 	
 }

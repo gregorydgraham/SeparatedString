@@ -214,7 +214,7 @@ public class SeparatedString {
 	 * @return returns the SeparatedString's contents encoded as a String
 	 */
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		final ArrayList<String> allTheElements = getStrings();
 		if (allTheElements.isEmpty()) {
 			return useWhenEmpty;
@@ -247,7 +247,7 @@ public class SeparatedString {
 		return replaceSequencesInString(s, getCtrlSequences());
 	}
 
-	private String replaceSequencesInString(String s, List<Pair<String, String>> sequences) {
+	private String replaceSequencesInString(String s, MapList<String, String> sequences) {
 		String result = s;
 		for (var entry : sequences) {
 			result = result.replace(entry.getKey(), entry.getValue());
@@ -255,35 +255,26 @@ public class SeparatedString {
 		return result;
 	}
 
-	private synchronized List<Pair<String, String>> getCtrlSequences() {
+	private synchronized MapList<String, String> getCtrlSequences() {
 		// the collection we want could be 
 		// a map as its a key/value relationship
 		// or a set as we don't want duplicate entries
-		// but I'm using a list as we need the escape sequence to be processed first
+		// but I'm using a list as we need the escape sequence to be processed first.
+		// This discussion has been implemented as MapList
 		//
 		// the key/value relationship is handled by the Pair<String, String> entry class
 		// and duplicate etc handling is covered in addToList()
-		List<Pair<String, String>> list = new ArrayList<>(8);
+		MapList<String, String> list = new MapList<>(8);
 		// the escape sequence needs to be first so we don't escape our own escapes
-		addToList(list, escapeChar, escapeChar + escapeChar);
-		addToList(list, separator, escapeChar + separator);
-		addToList(list, keyValueSeparator, escapeChar + keyValueSeparator);
-		addToList(list, prefix, escapeChar + prefix);
-		addToList(list, suffix, escapeChar + suffix);
-		addToList(list, useWhenEmpty, escapeChar + useWhenEmpty);
-		addToList(list, wrapAfter, escapeChar + wrapAfter);
-		addToList(list, wrapBefore, escapeChar + wrapBefore);
+		list.add(escapeChar, escapeChar + escapeChar);
+		list.add(separator, escapeChar + separator);
+		list.add(keyValueSeparator, escapeChar + keyValueSeparator);
+		list.add(prefix, escapeChar + prefix);
+		list.add(suffix, escapeChar + suffix);
+		list.add(useWhenEmpty, escapeChar + useWhenEmpty);
+		list.add(wrapAfter, escapeChar + wrapAfter);
+		list.add(wrapBefore, escapeChar + wrapBefore);
 		return list;
-	}
-
-	private void addToList(List<Pair<String, String>> list, String key, String value) {
-		if (key != null && !key.isEmpty()) {
-			// make sure we don't have duplicates
-			boolean alreadyInList = list.stream().anyMatch(p -> p.getKey().equals(key));
-			if (!alreadyInList) {
-				list.add(Pair.let(key, value));
-			}
-		}
 	}
 
 	/**
