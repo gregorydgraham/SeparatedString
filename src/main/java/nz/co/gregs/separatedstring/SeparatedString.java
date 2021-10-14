@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -86,15 +85,42 @@ public class SeparatedString {
 	SeparatedString() {
 	}
 
+	/**
+	 * Returns whether or not leading and trailing blanks will be trimmed.
+	 *
+	 * @return true if leading and trailing blanks will be removed during
+	 * processing.
+	 */
 	public boolean isTrimBlanks() {
 		return trimBlanks;
 	}
 
+	/**
+	 * Sets the SeparatedString to trim leading and trailing blanks during
+	 * processing.
+	 *
+	 * @return this SeparatedString with the trim blanks status set to true
+	 */
 	public SeparatedString trimBlanks() {
 		this.trimBlanks = true;
 		return this;
 	}
 
+	/**
+	 * Specified the separator to use dring processing.
+	 *
+	 * <p>
+	 * The main reason this library, and class, exists. Sets the separator to use
+	 * when processing.</p>
+	 *
+	 * <p>
+	 * for instance
+	 * {@code separatedString.addAll("alice","bob", "claire").separatedBy(",").encode()}
+	 * will produce a string like "alice,bob,claire".
+	 *
+	 * @param separator the character(s) to be placed between each element
+	 * @return this SeparatedString with the separator set
+	 */
 	public SeparatedString separatedBy(String separator) {
 		if (separator != null && !separator.isEmpty()) {
 			this.separator = separator;
@@ -102,16 +128,65 @@ public class SeparatedString {
 		return this;
 	}
 
+	/**
+	 * Sets the escape sequence to use during processing.
+	 *
+	 * <p>
+	 * While not vital, it is recommended that you set an escape sequence</p>
+	 *
+	 * <p>
+	 * for instance
+	 * {@code separatedString.addAll("alice","bob", "claire").separatedBy(",").withEscapeChar("\\").encode()}
+	 * will produce a string like "alice,bob,claire". A more useful example though
+	 * would be
+	 * {@code separatedString.addAll("smith, alice","staines, bob", "sullivan, claire").separatedBy(",").withEscapeChar("\\").encode()}
+	 * which would produce "smith\, alice,staines\, bob,sullivan\, claire"
+	 * allowing the {@link #decode(java.lang.String) } to faithfully reproduce the
+	 * correct values.</p>
+	 *
+	 * @param esc the character(s) to be placed before special character sequences
+	 * @return this SeparatedString
+	 */
 	public SeparatedString withEscapeChar(String esc) {
 		this.escapeChar = esc;
 		return this;
 	}
 
+	/**
+	 * Sets the key/value separator during processing.
+	 *
+	 * <p>
+	 * For use with maps</p>
+	 *
+	 * <p>
+	 * For maps to be reasonably encoded there needs to be a relationship between
+	 * the key and the value. SeparatedString uses the keyValueSeparator to encode
+	 * this relationship. Assuming a map of (mother->Alice, father->Bob)
+	 * {@code separatedString.addAll(map).withKeyValueSeparator("=").separatedBy(",")}
+	 * would produce "mother=Alice,father=Bob".</p>
+	 *
+	 * @param probablyEquals the character(s) to be placed between each key and
+	 * it's associated value
+	 * @return this separatedString
+	 */
 	public SeparatedString withKeyValueSeparator(String probablyEquals) {
 		this.keyValueSeparator = probablyEquals;
 		return this;
 	}
 
+	/**
+	 * Attempts to decode the provided string using the settings of this
+	 * SeparatedString.
+	 *
+	 * <p>
+	 * For instance
+	 * {@code separatedString.separatedBy(",").decode("alice,bob,claire")} would
+	 * produce a list consisting of "alice","bob", and "claire"</p>
+	 *
+	 * @param str a string consisting of separated values
+	 * @return a list of values from the string found using the settings of this
+	 * SeparatedString
+	 */
 	public List<String> decode(String str) {
 		return parseToList(str);
 	}
@@ -120,8 +195,8 @@ public class SeparatedString {
 	 * Encodes the contents as per the setup of the SeparatedString.
 	 *
 	 * <p>
-	 * for instance a SeparatedString.commaSeparated() with values 1, 2, and 3
-	 * with return "1,2,3".</p>
+	 * for instance a {@code SeparatedString.commaSeparated().addAll("1","2","3")}
+	 * will return "1,2,3".</p>
 	 *
 	 * @return returns the SeparatedString's contents encoded as a String
 	 */
@@ -129,6 +204,15 @@ public class SeparatedString {
 		return toString();
 	}
 
+	/**
+	 * Encodes the contents as per the setup of the SeparatedString.
+	 *
+	 * <p>
+	 * for instance a {@code SeparatedString.commaSeparated().addAll("1","2","3")}
+	 * will return "1,2,3".</p>
+	 *
+	 * @return returns the SeparatedString's contents encoded as a String
+	 */
 	@Override
 	public String toString() {
 		final ArrayList<String> allTheElements = getStrings();
@@ -143,7 +227,7 @@ public class SeparatedString {
 			for (String element : allTheElements) {
 				if (trimBlanks && element.isEmpty()) {
 				} else {
-					String str = escapeElement(element);
+					String str = escapeCtrlSequences(element);
 					currentElement = getWrapBefore() + str + getWrapAfter();
 					if (firstElement == null) {
 						firstElement = currentElement;
@@ -159,69 +243,88 @@ public class SeparatedString {
 		}
 	}
 
-	private String escapeForRegex(String s) {
-		return s
-				.replace("\\", "\\\\")
-				.replace("+", "\\+")
-				.replace("{", "\\{")
-				.replace("}", "\\}")
-				.replace("(", "\\(")
-				.replace(")", "\\)")
-				.replace("[", "\\[")
-				.replace("]", "\\]")
-				.replace(".", "\\.")
-				.replace("?", "\\?")
-				.replace("*", "\\*")
-				.replace("^", "\\^")
-				.replace("$", "\\$")
-				.replace("|", "\\|");
+	private String escapeCtrlSequences(String s) {
+		return replaceSequencesInString(s, getCtrlSequences());
 	}
 
-	private String escapeElement(String s) {
-		String findPattern = "(?<special>(";
-		if (separator != null && !separator.isEmpty()) {
-			findPattern += "(" + escapeForRegex(separator) + ")";
+	private String replaceSequencesInString(String s, List<Pair<String, String>> sequences) {
+		String result = s;
+		for (var entry : sequences) {
+			result = result.replace(entry.getKey(), entry.getValue());
 		}
-		if (keyValueSeparator != null && !keyValueSeparator.isEmpty()) {
-			findPattern += "|(" + escapeForRegex(keyValueSeparator) + ")";
-		}
-		if (prefix != null && !prefix.isEmpty()) {
-			findPattern += "|(" + escapeForRegex(prefix) + ")";
-		}
-		if (escapeChar != null && !escapeChar.isEmpty()) {
-			findPattern += "|(" + escapeForRegex(escapeChar) + ")";
-		}
-		if (suffix != null && !suffix.isEmpty()) {
-			findPattern += "|(" + escapeForRegex(suffix) + ")";
-		}
-		if (useWhenEmpty != null && !useWhenEmpty.isEmpty()) {
-			findPattern += "|(" + escapeForRegex(useWhenEmpty) + ")";
-		}
-		if (wrapAfter != null && !wrapAfter.isEmpty()) {
-			findPattern += "|(" + escapeForRegex(wrapAfter) + ")";
-		}
-		if (wrapBefore != null && !wrapBefore.isEmpty()) {
-			findPattern += "|(" + escapeForRegex(wrapBefore) + ")";
-		}
-		findPattern += "){1})";
-		String replacePattern = "" + escapeForRegex(escapeChar) + "${special}";
-		String result = Pattern.compile(findPattern).matcher(s).replaceAll(replacePattern);
 		return result;
 	}
 
+	private synchronized List<Pair<String, String>> getCtrlSequences() {
+		// the collection we want could be 
+		// a map as its a key/value relationship
+		// or a set as we don't want duplicate entries
+		// but I'm using a list as we need the escape sequence to be processed first
+		//
+		// the key/value relationship is handled by the Pair<String, String> entry class
+		// and duplicate etc handling is covered in addToList()
+		List<Pair<String, String>> list = new ArrayList<>(8);
+		// the escape sequence needs to be first so we don't escape our own escapes
+		addToList(list, escapeChar, escapeChar + escapeChar);
+		addToList(list, separator, escapeChar + separator);
+		addToList(list, keyValueSeparator, escapeChar + keyValueSeparator);
+		addToList(list, prefix, escapeChar + prefix);
+		addToList(list, suffix, escapeChar + suffix);
+		addToList(list, useWhenEmpty, escapeChar + useWhenEmpty);
+		addToList(list, wrapAfter, escapeChar + wrapAfter);
+		addToList(list, wrapBefore, escapeChar + wrapBefore);
+		return list;
+	}
+
+	private void addToList(List<Pair<String, String>> list, String key, String value) {
+		if (key != null && !key.isEmpty()) {
+			// make sure we don't have duplicates
+			boolean alreadyInList = list.stream().anyMatch(p -> p.getKey().equals(key));
+			if (!alreadyInList) {
+				list.add(Pair.let(key, value));
+			}
+		}
+	}
+
+	/**
+	 * Returns true if there are currently values stored in this SeparatedString.
+	 *
+	 * @return true if there are values
+	 */
 	public boolean isNotEmpty() {
 		return !isEmpty();
 	}
 
+	/**
+	 * Returns true if there are NO values stored in this SeparatedString.
+	 *
+	 * @return true if there are NO values
+	 */
 	public boolean isEmpty() {
 		return getStrings().isEmpty();
 	}
 
+	/**
+	 * Removes all values in the collection from the values within this
+	 * SeparatedString.
+	 *
+	 * @param c a collection of objects
+	 * @return this SeparatedString
+	 */
 	public SeparatedString removeAll(Collection<?> c) {
 		getStrings().removeAll(c);
 		return this;
 	}
 
+	/**
+	 * Adds all values in the collection to the values within this
+	 * SeparatedString.
+	 *
+	 * @param index the position the values should start at in the list of values
+	 * within this SeparatedString
+	 * @param c a collection of objects
+	 * @return this SeparatedString
+	 */
 	public SeparatedString addAll(int index, Collection<String> c) {
 		if (c != null) {
 			getStrings().addAll(index, c);
@@ -229,6 +332,13 @@ public class SeparatedString {
 		return this;
 	}
 
+	/**
+	 * Adds all values in the collection to the values within this
+	 * SeparatedString.
+	 *
+	 * @param c a collection of objects
+	 * @return this SeparatedString
+	 */
 	public SeparatedString addAll(Collection<String> c) {
 		if (c != null && !c.isEmpty()) {
 			getStrings().addAll(c);
@@ -236,6 +346,13 @@ public class SeparatedString {
 		return this;
 	}
 
+	/**
+	 * Adds all values in the collection to the values within this
+	 * SeparatedString.
+	 *
+	 * @param c a collection of objects
+	 * @return this SeparatedString
+	 */
 	public SeparatedString addAll(Map<String, String> c) {
 		if (c != null && !c.isEmpty()) {
 			c.forEach((key, value) -> {
@@ -245,12 +362,26 @@ public class SeparatedString {
 		return this;
 	}
 
+	/**
+	 * Adds all map entries to the values within this SeparatedString.
+	 *
+	 * @param c a map of objects
+	 * @param keyValueSeparator the key/value separator to use during processing
+	 * (overrides any previous key/value separator)
+	 * @return this SeparatedString
+	 */
 	public SeparatedString addAll(Map<String, String> c, String keyValueSeparator) {
 		withKeyValueSeparator(keyValueSeparator);
 		addAll(c);
 		return this;
 	}
 
+	/**
+	 * Adds all values to the values within this SeparatedString.
+	 *
+	 * @param strs several strings to be added as values
+	 * @return this SeparatedString
+	 */
 	public SeparatedString addAll(String... strs) {
 		final List<String> asList = Arrays.asList(strs);
 		if (asList != null) {
@@ -259,18 +390,42 @@ public class SeparatedString {
 		return this;
 	}
 
-	public <TYPE> SeparatedString addAll(Function<TYPE, String> stringProcessor, TYPE... strs) {
-		return addAll(stringProcessor, Arrays.asList(strs));
+	/**
+	 * Adds all values to the values within this SeparatedString.
+	 *
+	 * @param <TYPE> the type of the objects to be added to the values
+	 * @param stringProcessor a method that transforms objects of type TYPE to
+	 * Strings
+	 * @param objects the objects to be added
+	 * @return this SeparatedString
+	 */
+	public <TYPE> SeparatedString addAll(Function<TYPE, String> stringProcessor, TYPE... objects) {
+		return addAll(stringProcessor, Arrays.asList(objects));
 	}
 
-	public <TYPE> SeparatedString addAll(Function<TYPE, String> stringProcessor, List<TYPE> strs) {
-		final List<String> asList = strs.stream().map(stringProcessor).collect(Collectors.toList());
+	/**
+	 * Adds all values in the list to the values within this SeparatedString.
+	 *
+	 * @param <TYPE> the type of the objects to be added to the values
+	 * @param stringProcessor a method that transforms objects of type TYPE to
+	 * Strings
+	 * @param objects the objects to be added
+	 * @return this SeparatedString
+	 */
+	public <TYPE> SeparatedString addAll(Function<TYPE, String> stringProcessor, List<TYPE> objects) {
+		final List<String> asList = objects.stream().map(stringProcessor).collect(Collectors.toList());
 		if (asList != null) {
 			getStrings().addAll(asList);
 		}
 		return this;
 	}
 
+	/**
+	 * Removes the value at the index from the values within this SeparatedString.
+	 *
+	 * @param index the index of the value to remove
+	 * @return this SeparatedString
+	 */
 	public SeparatedString remove(int index) {
 		getStrings().remove(index);
 		return this;
@@ -291,16 +446,37 @@ public class SeparatedString {
 		return this;
 	}
 
+	/**
+	 * Inserts the specified element into the list of known values.
+	 *
+	 * @param string element to be inserted
+	 * @return this
+	 * @throws IndexOutOfBoundsException {@inheritDoc}
+	 */
 	public SeparatedString add(String string) {
 		getStrings().add(string);
 		return this;
 	}
 
+	/**
+	 * Inserts the specified element into the list of known values.
+	 *
+	 * @param string element to be inserted
+	 * @return this
+	 * @throws IndexOutOfBoundsException {@inheritDoc}
+	 */
 	public SeparatedString add(Object string) {
 		getStrings().add(string.toString());
 		return this;
 	}
 
+	/**
+	 * Inserts the specified elements into the list of known values.
+	 *
+	 * @param strings elements to be inserted
+	 * @return this
+	 * @throws IndexOutOfBoundsException {@inheritDoc}
+	 */
 	public SeparatedString containing(String... strings) {
 		return addAll(strings);
 	}
@@ -547,28 +723,28 @@ public class SeparatedString {
 		return keyValueSeparator;
 	}
 
-	private boolean hasEscapeChar() {
+	public boolean hasEscapeChar() {
 		return !escapeChar.isEmpty();
 	}
 
-	private boolean hasWrapping() {
+	public boolean hasWrapping() {
 		return !getWrapBefore().isEmpty()
 				|| !getWrapAfter().isEmpty();
 	}
 
-	private boolean hasPrefix() {
+	public boolean hasPrefix() {
 		return !prefix.isEmpty();
 	}
 
-	private boolean hasSuffix() {
+	public boolean hasSuffix() {
 		return !suffix.isEmpty();
 	}
 
-	private boolean hasSymetricWrapping() {
+	public boolean hasSymetricWrapping() {
 		return prefix != null && prefix.equals(suffix);
 	}
 
-	private boolean hasAsymetricWrapping() {
+	public boolean hasAsymetricWrapping() {
 		return !hasSymetricWrapping();
 	}
 }
