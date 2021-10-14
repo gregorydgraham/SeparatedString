@@ -521,57 +521,201 @@ public class SeparatedString {
 		return escapeChar;
 	}
 
+	/**
+	 * Instructs the SeparatedString to repeat the first element at the end if
+	 * necessary.
+	 *
+	 * <p>
+	 * While closed loops are unusual for most applications, this is useful when
+	 * defining polygons in some GIS systems.</p>
+	 *
+	 * @return this SeparatedString
+	 */
 	public SeparatedString withClosedLoop() {
 		this.closedLoop = true;
 		return this;
 	}
 
+	/**
+	 * Instructs the SeparatedString to NOT repeat the first element at the end.
+	 *
+	 * <p>
+	 * While closed loops are unusual for most applications, this is useful when
+	 * defining polygons in some GIS systems.</p>
+	 *
+	 * @return this SeparatedString
+	 */
 	public SeparatedString withoutClosedLoop() {
 		this.closedLoop = false;
 		return this;
 	}
 
+	/**
+	 * Implements support for quoting values to distinguish them from the other
+	 * elements of the SeparatedString.
+	 *
+	 * <p>
+	 * for instance
+	 * {@code separatedString.addAll("smith, alice","staines, bob", "sullivan, claire").separatedBy(",").encode()}
+	 * would produce "smith, alice,staines, bob,sullivan, claire" forcing {@link #decode(java.lang.String)
+	 * } to report the values as ("smith", " alice","staines", " bob", "sullivan",
+	 * " claire").</p>
+	 * <p>
+	 * using a wraparound term
+	 * {@code separatedString.addAll("smith, alice","staines, bob", "sullivan, claire").separatedBy(",").withEachTermPrecededAndFollowedWith("|").encode()}
+	 * would produce "|smith, alice|,|staines, bob|,|sullivan, claire|" allowing {@link #decode(java.lang.String)
+	 * } to report the values correctly.</p>
+	 *
+	 * @param wrapAroundEachTerm the character sequence to be placed before and
+	 * after every value
+	 * @return the SeparatedString
+	 */
 	public SeparatedString withEachTermPrecededAndFollowedWith(String wrapAroundEachTerm) {
 		this.wrapBefore = wrapAroundEachTerm;
 		this.wrapAfter = wrapAroundEachTerm;
 		return this;
 	}
 
+	/**
+	 * Implements support for quoting values to distinguish them from the other
+	 * elements of the SeparatedString.
+	 *
+	 * <p>
+	 * for instance
+	 * {@code separatedString.addAll("smith, alice","staines, bob", "sullivan, claire").separatedBy(",").encode()}
+	 * would produce "smith, alice,staines, bob,sullivan, claire" forcing {@link #decode(java.lang.String)
+	 * } to report the values as ("smith", " alice","staines", " bob", "sullivan",
+	 * " claire").</p>
+	 * <p>
+	 * using a wraparound term
+	 * {@code separatedString.addAll("smith, alice","staines, bob", "sullivan, claire").separatedBy(",").withEachTermWrappedWith("{","}").encode()}
+	 * would produce "{smith, alice},{staines, bob},{sullivan, claire}" allowing {@link #decode(java.lang.String)
+	 * } to report the values correctly.</p>
+	 *
+	 * @param beforeEachTerm the character sequence to be placed before every
+	 * value
+	 * @param afterEachTerm the character sequence to be placed after every value
+	 * @return this SeparatedString
+	 */
 	public SeparatedString withEachTermWrappedWith(String beforeEachTerm, String afterEachTerm) {
 		this.wrapBefore = beforeEachTerm;
 		this.wrapAfter = afterEachTerm;
 		return this;
 	}
 
+	/**
+	 * Implements support for quoting values to distinguish them from the other
+	 * elements of the SeparatedString.
+	 *
+	 * <p>
+	 * for instance
+	 * {@code separatedString.addAll("smith, alice","staines, bob", "sullivan, claire").separatedBy(",").encode()}
+	 * would produce "smith, alice,staines, bob,sullivan, claire" forcing {@link #decode(java.lang.String)
+	 * } to report the values as ("smith", " alice","staines", " bob", "sullivan",
+	 * " claire").</p>
+	 * <p>
+	 * using a wraparound term null
+	 * {@code separatedString.addAll("smith, alice","staines, bob", "sullivan, claire").separatedBy(",").withThisBeforeEachTerm("[").encode()}
+	 * would produce "[smith, alice,[staines, bob,[sullivan, claire" allowing
+	 * {@link #decode(java.lang.String)} to report the values correctly.</p>
+	 *
+	 * <p>
+	 * You should probably also use {@link #withThisAfterEachTerm(java.lang.String)
+	 * }
+	 * </p>
+	 *
+	 * @param placeAtTheBeginningOfEachTerm the character sequence to be placed
+	 * before every value
+	 * @return this SeparatedString
+	 */
 	public SeparatedString withThisBeforeEachTerm(String placeAtTheBeginningOfEachTerm) {
 		this.wrapBefore = placeAtTheBeginningOfEachTerm;
 		return this;
 	}
 
+	/**
+	 * Implements support for quoting values to distinguish them from the other
+	 * elements of the SeparatedString.
+	 *
+	 * <p>
+	 * for instance
+	 * {@code separatedString.addAll("smith, alice","staines, bob", "sullivan, claire").separatedBy(",").encode()}
+	 * would produce "smith, alice,staines, bob,sullivan, claire" forcing {@link #decode(java.lang.String)
+	 * } to report the values as ("smith", " alice","staines", " bob", "sullivan",
+	 * " claire").</p>
+	 * <p>
+	 * using a wraparound term null
+	 * {@code separatedString.addAll("smith, alice","staines, bob", "sullivan, claire").separatedBy(",").withThisAfterEachTerm("]").encode()}
+	 * would produce "smith, alice],staines, bob],sullivan, claire]" allowing
+	 * {@link #decode(java.lang.String)} to report the values correctly.</p>
+	 *
+	 * <p>
+	 * You should probably also use {@link #withThisBeforeEachTerm(java.lang.String)
+	 * }
+	 * </p>
+	 *
+	 * @param placeAtTheEndOfEachTerm the character sequence to be placed before
+	 * every value
+	 * @return this SeparatedString
+	 */
 	public SeparatedString withThisAfterEachTerm(String placeAtTheEndOfEachTerm) {
 		this.wrapAfter = placeAtTheEndOfEachTerm;
 		return this;
 	}
 
+	/**
+	 * Adds a value to be placed at the beginning of the string before any values.
+	 *
+	 * @param placeAtTheBeginningOfTheString the very first item in the encoded
+	 * result
+	 * @return this SeparatedString
+	 */
 	public SeparatedString withPrefix(String placeAtTheBeginningOfTheString) {
 		this.prefix = placeAtTheBeginningOfTheString;
 		return this;
 	}
 
+	/**
+	 * Adds a value to be placed at the very end of the encoded string/
+	 *
+	 * @param placeAtTheEndOfTheString the last item in the encode result
+	 * @return this SeparatedString
+	 */
 	public SeparatedString withSuffix(String placeAtTheEndOfTheString) {
 		this.suffix = placeAtTheEndOfTheString;
 		return this;
 	}
 
-	public final SeparatedString endsWith(String string) {
-		return withSuffix(string);
+	/**
+	 * Adds a value to be placed at the very end of the encoded string/
+	 *
+	 * @param placeAtTheEndOfTheString the last item in the encode result
+	 * @return this SeparatedString
+	 */
+	public final SeparatedString endsWith(String placeAtTheEndOfTheString) {
+		return withSuffix(placeAtTheEndOfTheString);
 	}
 
+	/**
+	 * Provides a value to be used whenever the encoded result would be empty.
+	 *
+	 * @param string a string to use instead of returning an empty string while
+	 * encoding.
+	 * @return this SeparatedString
+	 */
 	public final SeparatedString useWhenEmpty(String string) {
 		this.useWhenEmpty = string;
 		return this;
 	}
 
+	/**
+	 * Decode the string provided and return a list of values.
+	 *
+	 *
+	 * @param input the string to be decoded
+	 * @return a list of values as defined by the string and the settings of this
+	 * SeparatedString
+	 */
 	public List<String> parseToList(String input) {
 		List<String> output = new ArrayList<>();
 		if (input == null || input.isEmpty()) {
@@ -675,10 +819,24 @@ public class SeparatedString {
 		return output;
 	}
 
+	/**
+	 * Decode the string assuming it conforms to this SeparatedString's encoding
+	 * scheme, and return the values found as an array.
+	 *
+	 * @param input the string to be decoded
+	 * @return the values found
+	 */
 	public String[] parseToArray(String input) {
 		return parseToList(input).toArray(new String[]{});
 	}
 
+	/**
+	 * Decode the string assuming it conforms to this SeparatedString's encoding
+	 * scheme, and return the values found as an array.
+	 *
+	 * @param input the string to be decoded
+	 * @return the values found
+	 */
 	public Map<String, String> parseToMap(String input) {
 		Map<String, String> map = new HashMap<>(0);
 		if (input == null || input.isEmpty()) {
@@ -710,31 +868,72 @@ public class SeparatedString {
 		return map;
 	}
 
+	/**
+	 * Returns the string used to separate a key from its alue during encoding
+	 *
+	 * @return the key/value separator
+	 */
 	public String getKeyValueSeparator() {
 		return keyValueSeparator;
 	}
 
+	/**
+	 * indicates whether this SeparatedString has a defined escape sequence.
+	 *
+	 * @return TRUE if an escape sequence has been defined
+	 */
 	public boolean hasEscapeChar() {
 		return !escapeChar.isEmpty();
 	}
 
+	/**
+	 * Indicates whether any wrapping sequences have been defined.
+	 *
+	 * @return TRUE if wrap before or wrap after are not empty.
+	 */
 	public boolean hasWrapping() {
 		return !getWrapBefore().isEmpty()
 				|| !getWrapAfter().isEmpty();
 	}
 
+	/**
+	 * Checks if a prefix has been defined
+	 *
+	 * @return TRUE if a prefix has been defined
+	 */
 	public boolean hasPrefix() {
 		return !prefix.isEmpty();
 	}
 
+	/**
+	 * Checks if a suffux has been defined.
+	 *
+	 * @return TRUE if a suffix has been defined
+	 */
 	public boolean hasSuffix() {
 		return !suffix.isEmpty();
 	}
 
+	/**
+	 * Checks whether the prefix and suffix are the same.
+	 *
+	 * <p>
+	 * If they're both empty, this will return TRUE.</p>
+	 *
+	 * @return TRUE if the suffix and prefix are the same.
+	 */
 	public boolean hasSymetricWrapping() {
 		return prefix != null && prefix.equals(suffix);
 	}
 
+	/**
+	 * Checks whether the prefix and suffix are different.
+	 *
+	 * <p>
+	 * If they're both empty, this will return FALSE.</p>
+	 *
+	 * @return TRUE if the suffix and prefix have different values.
+	 */
 	public boolean hasAsymetricWrapping() {
 		return !hasSymetricWrapping();
 	}

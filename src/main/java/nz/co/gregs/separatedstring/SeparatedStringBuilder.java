@@ -209,18 +209,44 @@ public class SeparatedStringBuilder {
 		return new SeparatedString().separatedBy(separator);
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a single space.
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString bySpaces() {
 		return forSeparator(" ");
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a single comma.
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString byCommas() {
 		return forSeparator(",");
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a comma and a
+	 * single space.
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString byCommaSpace() {
 		return forSeparator(", ");
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a single comma,
+	 * but also encapsulating each value in quotes and defining backslash as an
+	 * escape sequence.
+	 *
+	 * <p>
+	 * This is a more robust SeparateString definition than byCommas().</p>
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString byCommasWithQuotedTermsAndBackslashEscape() {
 		return byCommas()
 				.withThisBeforeEachTerm("\"")
@@ -228,6 +254,16 @@ public class SeparatedStringBuilder {
 				.withEscapeChar("\\");
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a single comma,
+	 * but also encapsulating each value in quotes and defining \\ as an escape
+	 * sequence.
+	 *
+	 * <p>
+	 * This is a more robust SeparateString definition than byCommas().</p>
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString byCommasWithQuotedTermsAndDoubleBackslashEscape() {
 		return byCommas()
 				.withThisBeforeEachTerm("\"")
@@ -235,26 +271,70 @@ public class SeparatedStringBuilder {
 				.withEscapeChar("\\\\");
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a tab.
+	 *
+	 * <p>
+	 * You should probably use {@link #tsv() } instead as it produces more
+	 * reliable encodings</p>
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString byTabs() {
 		return forSeparator("\t");
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a newline
+	 * character.
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString byLines() {
 		return forSeparator("\n");
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a space.
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString spaceSeparated() {
 		return bySpaces();
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a comma.
+	 *
+	 * <p>
+	 * You should probably use {@link #csv() } instead as it produces more
+	 * reliable encodings</p>
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString commaSeparated() {
 		return byCommas();
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a tab.
+	 *
+	 * <p>
+	 * You should probably use {@link #tsv() } instead as it produces more
+	 * reliable encodings</p>
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString tabSeparated() {
 		return byTabs();
 	}
 
+	/**
+	 * Creates a SeparatedString that separates the values with a new line
+	 * character.
+	 *
+	 * @return a SeparateString
+	 */
 	public static SeparatedString lineSeparated() {
 		return byLines();
 	}

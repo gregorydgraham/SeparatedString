@@ -20,18 +20,48 @@ import java.util.Collection;
  */
 public class MapList<KEY, VALUE> extends ArrayList<Pair<KEY, VALUE>> {
 
+	/**
+	 * Creates a new list that can store key/value pairs.
+	 *
+	 */
 	public MapList() {
 		super();
 	}
 
+	/**
+	 * Creates a new list that can store key/value pairs.
+	 *
+	 * @param c a collection of key/value pairs
+	 */
 	public MapList(Collection<? extends Pair<KEY, VALUE>> c) {
 		super(c);
 	}
 
+	/**
+	 * Creates a new list that can store key/value pairs.
+	 *
+	 * @param initialCapacity the initial capacity of the MapList
+	 */
 	public MapList(int initialCapacity) {
 		super(initialCapacity);
 	}
 
+	/**
+	 * Adds a key/value pair.
+	 *
+	 * <p>
+	 * Internally the pair is stored as a Pair object.</p>
+	 *
+	 * <p>
+	 * Before insertion, the key is checked to ensure it is non-null, not empty,
+	 * and unique.</p>
+	 *
+	 * <p>
+	 * Pairs are stored in insertion order, not other ordering is provided.</p>
+	 * @param key the key of the pair, this is (generally) the part of the pair that is referenced or compared
+	 * @param value the value of the pair
+	 * @return TRUE if the pair is inserted, otherwise FALSE
+	 */
 	public boolean add(KEY key, VALUE value) {
 		boolean result = false;
 		// make sure the key actually has a value
