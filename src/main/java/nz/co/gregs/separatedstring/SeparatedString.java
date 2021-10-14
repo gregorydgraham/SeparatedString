@@ -30,6 +30,7 @@
  */
 package nz.co.gregs.separatedstring;
 
+import util.MapList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
