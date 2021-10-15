@@ -249,9 +249,16 @@ public class SeparatedString {
 	}
 
 	private String replaceSequencesInString(String s, MapList<String, String> sequences) {
-		String result = s;
+		String result = (s == null ? "" : s);
 		for (var entry : sequences) {
-			result = result.replace(entry.getKey(), entry.getValue());
+			final String key = entry.getKey();
+			if (key != null && !key.isEmpty()) {
+				String value = entry.getValue();
+				if (value == null || value.isEmpty()) {
+					value = "";
+				}
+				result = result.replace(key, value);
+			}
 		}
 		return result;
 	}
