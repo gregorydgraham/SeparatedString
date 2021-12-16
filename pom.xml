@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nz.co.gregs</groupId>
 	<artifactId>separatedstring</artifactId>
-	<version>1.8.2-SNAPSHOT</version>
+	<version>1.8.2</version>
 	<packaging>jar</packaging>
 	<name>SeparatedString</name>
 	<description>A fluent API to generate and parse CSV amd bracketed lists</description>
@@ -37,7 +37,7 @@
 		<url>https://github.com/gregorydgraham/SeparateString</url>
 		<connection>scm:git:https://github.com/gregorydgraham/SeparatedString.git</connection>
 		<developerConnection>scm:git:https://github.com/gregorydgraham/SeparatedString.git</developerConnection>
-		<tag>separatedstring-1.8.1</tag>
+		<tag>separatedstring-1.8.2</tag>
 	</scm>
 		
 	<dependencies>
