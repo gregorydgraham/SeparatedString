@@ -76,6 +76,21 @@ public class SeparatedStringTest {
 	}
 
 	@Test
+	public void testSimpleParsingWithNullsRetained() {
+		final SeparatedString sepString = SeparatedStringBuilder.byCommas().withNullsRetained(true);
+		sepString.addAll("aaa", "bbb", "ccc", null);
+		final String encoded = sepString.toString();
+		assertThat(encoded, is("aaa,bbb,ccc,null"));
+
+		String[] parsed = sepString.parseToArray(encoded);
+		assertThat(parsed.length, is(4));
+		assertThat(parsed[0], is("aaa"));
+		assertThat(parsed[1], is("bbb"));
+		assertThat(parsed[2], is("ccc"));
+		assertThat(parsed[3], is("null"));
+	}
+
+	@Test
 	public void testCommaSpaceParsing() {
 		final SeparatedString sepString = SeparatedStringBuilder.byCommaSpace();
 		sepString.addAll("aaa", "bbb", "ccc");

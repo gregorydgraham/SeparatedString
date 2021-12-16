@@ -82,6 +82,7 @@ public class SeparatedString {
 	private String keyValueSeparator = "";
 	private boolean closedLoop = false;
 	private boolean trimBlanks = false;
+	private boolean retainNulls = false;
 
 	SeparatedString() {
 	}
@@ -216,7 +217,7 @@ public class SeparatedString {
 	 */
 	@Override
 	public synchronized String toString() {
-		final ArrayList<String> allTheElements = getStrings();
+		final ArrayList<String> allTheElements = strings;
 		if (allTheElements.isEmpty()) {
 			return useWhenEmpty;
 		} else {
@@ -229,7 +230,11 @@ public class SeparatedString {
 				if (trimBlanks && element.isEmpty()) {
 				} else {
 					String str = escapeCtrlSequences(element);
-					currentElement = getWrapBefore() + str + getWrapAfter();
+					if (retainNulls) {
+						currentElement = getWrapBefore() + str + getWrapAfter();
+					} else {
+						currentElement = getWrapBefore() + (str == null ? "" : str) + getWrapAfter();
+					}
 					if (firstElement == null) {
 						firstElement = currentElement;
 					}
@@ -249,18 +254,22 @@ public class SeparatedString {
 	}
 
 	private String replaceSequencesInString(String s, MapList<String, String> sequences) {
-		String result = (s == null ? "" : s);
-		for (var entry : sequences) {
-			final String key = entry.getKey();
-			if (key != null && !key.isEmpty()) {
-				String value = entry.getValue();
-				if (value == null || value.isEmpty()) {
-					value = "";
+		if (s == null) {
+			return s;
+		} else {
+			String result = s;
+			for (var entry : sequences) {
+				final String key = entry.getKey();
+				if (key != null && !key.isEmpty()) {
+					String value = entry.getValue();
+					if (value == null || value.isEmpty()) {
+						value = "";
+					}
+					result = result.replace(key, value);
 				}
-				result = result.replace(key, value);
 			}
+			return result;
 		}
-		return result;
 	}
 
 	private synchronized MapList<String, String> getCtrlSequences() {
@@ -300,7 +309,7 @@ public class SeparatedString {
 	 * @return true if there are NO values
 	 */
 	public boolean isEmpty() {
-		return getStrings().isEmpty();
+		return strings.isEmpty();
 	}
 
 	/**
@@ -311,7 +320,7 @@ public class SeparatedString {
 	 * @return this SeparatedString
 	 */
 	public SeparatedString removeAll(Collection<?> c) {
-		getStrings().removeAll(c);
+		strings.removeAll(c);
 		return this;
 	}
 
@@ -326,7 +335,7 @@ public class SeparatedString {
 	 */
 	public SeparatedString addAll(int index, Collection<String> c) {
 		if (c != null) {
-			getStrings().addAll(index, c);
+			strings.addAll(index, c);
 		}
 		return this;
 	}
@@ -340,7 +349,7 @@ public class SeparatedString {
 	 */
 	public SeparatedString addAll(Collection<String> c) {
 		if (c != null && !c.isEmpty()) {
-			getStrings().addAll(c);
+			strings.addAll(c);
 		}
 		return this;
 	}
@@ -355,7 +364,7 @@ public class SeparatedString {
 	public SeparatedString addAll(Map<String, String> c) {
 		if (c != null && !c.isEmpty()) {
 			c.forEach((key, value) -> {
-				getStrings().add(key + getKeyValueSeparator() + value);
+				strings.add(key + getKeyValueSeparator() + value);
 			});
 		}
 		return this;
@@ -384,7 +393,7 @@ public class SeparatedString {
 	public SeparatedString addAll(String... strs) {
 		final List<String> asList = Arrays.asList(strs);
 		if (asList != null) {
-			getStrings().addAll(asList);
+			strings.addAll(asList);
 		}
 		return this;
 	}
@@ -414,7 +423,7 @@ public class SeparatedString {
 	public <TYPE> SeparatedString addAll(Function<TYPE, String> stringProcessor, List<TYPE> objects) {
 		final List<String> asList = objects.stream().map(stringProcessor).collect(Collectors.toList());
 		if (asList != null) {
-			getStrings().addAll(asList);
+			strings.addAll(asList);
 		}
 		return this;
 	}
@@ -426,7 +435,7 @@ public class SeparatedString {
 	 * @return this SeparatedString
 	 */
 	public SeparatedString remove(int index) {
-		getStrings().remove(index);
+		strings.remove(index);
 		return this;
 	}
 
@@ -441,7 +450,7 @@ public class SeparatedString {
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
 	public SeparatedString add(int index, String element) {
-		getStrings().add(index, element);
+		strings.add(index, element);
 		return this;
 	}
 
@@ -453,7 +462,7 @@ public class SeparatedString {
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
 	public SeparatedString add(String string) {
-		getStrings().add(string);
+		strings.add(string);
 		return this;
 	}
 
@@ -465,7 +474,11 @@ public class SeparatedString {
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
 	public SeparatedString add(Object string) {
-		getStrings().add(string.toString());
+		if (string == null) {
+			strings.add(null);
+		} else {
+			strings.add(string.toString());
+		}
 		return this;
 	}
 
@@ -491,7 +504,8 @@ public class SeparatedString {
 	 * @return the strings
 	 */
 	public ArrayList<String> getStrings() {
-		return strings;
+		ArrayList<String> arrayList = new ArrayList<String>(strings);
+		return arrayList;
 	}
 
 	/**
@@ -691,6 +705,22 @@ public class SeparatedString {
 	 */
 	public SeparatedString withSuffix(String placeAtTheEndOfTheString) {
 		this.suffix = placeAtTheEndOfTheString;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not to keep NULL values as "null" or changed into empty
+	 * strings.
+	 *
+	 * <p>
+	 * Defaults to false.</p>
+	 *
+	 * @param addNullsAsNull TRUE if null values should be added as "null" empty
+	 * strings, FALSE if null values should be replaced with the empty string "".
+	 * @return this SeparatedString
+	 */
+	public SeparatedString withNullsRetained(boolean addNullsAsNull) {
+		this.retainNulls = addNullsAsNull;
 		return this;
 	}
 
