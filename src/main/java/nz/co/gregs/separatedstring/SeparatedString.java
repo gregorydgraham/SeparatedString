@@ -163,7 +163,7 @@ public class SeparatedString {
 	 * <p>
 	 * For maps to be reasonably encoded there needs to be a relationship between
 	 * the key and the value. SeparatedString uses the keyValueSeparator to encode
-	 * this relationship. Assuming a map of (mother->Alice, father->Bob)
+	 * this relationship. Assuming a map of (mother-&gt;Alice, father-&gt;Bob)
 	 * {@code separatedString.addAll(map).withKeyValueSeparator("=").separatedBy(",")}
 	 * would produce "mother=Alice,father=Bob".</p>
 	 *
