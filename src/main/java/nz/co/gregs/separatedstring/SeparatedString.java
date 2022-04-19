@@ -355,6 +355,19 @@ public class SeparatedString {
 	}
 
 	/**
+	 * Adds the key and value to the values within this
+	 * SeparatedString.
+	 *
+	 * @param key the label for the value
+	 * @param value the value to be stored
+	 * @return this SeparatedString
+	 */
+	public SeparatedString add(String key, String value) {
+		strings.add(key + getKeyValueSeparator() + value);
+		return this;
+	}
+
+	/**
 	 * Adds all values in the collection to the values within this
 	 * SeparatedString.
 	 *
