@@ -109,7 +109,7 @@ public class SeparatedString {
 	}
 
 	/**
-	 * Specified the separator to use dring processing.
+	 * Specified the separator to use during processing.
 	 *
 	 * <p>
 	 * The main reason this library, and class, exists. Sets the separator to use
