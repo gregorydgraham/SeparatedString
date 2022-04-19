@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import nz.co.gregs.separatedstring.util.StringEntry;
 
 /**
  * Simple access to creating a string of a variety of strings separated by a
@@ -72,7 +73,7 @@ import java.util.stream.Collectors;
 public class SeparatedString {
 
 	private String separator = " ";
-	private final ArrayList<String> strings = new ArrayList<>();
+	private final ArrayList<StringEntry> strings = new ArrayList<>();
 	private String prefix = "";
 	private String suffix = "";
 	private String wrapBefore = "";
@@ -217,7 +218,7 @@ public class SeparatedString {
 	 */
 	@Override
 	public synchronized String toString() {
-		final ArrayList<String> allTheElements = strings;
+		final ArrayList<StringEntry> allTheElements = strings;
 		if (allTheElements.isEmpty()) {
 			return useWhenEmpty;
 		} else {
@@ -226,10 +227,10 @@ public class SeparatedString {
 
 			String currentElement = "";
 			String firstElement = null;
-			for (String element : allTheElements) {
+			for (StringEntry element : allTheElements) {
 				if (trimBlanks && element.isEmpty()) {
 				} else {
-					String str = escapeCtrlSequences(element);
+					String str = element.getFormattedString(this);
 					if (retainNulls) {
 						currentElement = getWrapBefore() + str + getWrapAfter();
 					} else {
@@ -246,29 +247,6 @@ public class SeparatedString {
 				strs.append(sep).append(firstElement);
 			}
 			return getPrefix() + strs.toString() + getSuffix();
-		}
-	}
-
-	private String escapeCtrlSequences(String s) {
-		return replaceSequencesInString(s, getCtrlSequences());
-	}
-
-	private String replaceSequencesInString(String s, MapList<String, String> sequences) {
-		if (s == null) {
-			return s;
-		} else {
-			String result = s;
-			for (var entry : sequences) {
-				final String key = entry.getKey();
-				if (key != null && !key.isEmpty()) {
-					String value = entry.getValue();
-					if (value == null || value.isEmpty()) {
-						value = "";
-					}
-					result = result.replace(key, value);
-				}
-			}
-			return result;
 		}
 	}
 
@@ -335,7 +313,11 @@ public class SeparatedString {
 	 */
 	public SeparatedString addAll(int index, Collection<String> c) {
 		if (c != null) {
-			strings.addAll(index, c);
+			final List<StringEntry> entries
+					= c.stream()
+							.map((t) -> new StringEntry(t))
+							.collect(Collectors.toList());
+			strings.addAll(index, entries);
 		}
 		return this;
 	}
@@ -349,21 +331,24 @@ public class SeparatedString {
 	 */
 	public SeparatedString addAll(Collection<String> c) {
 		if (c != null && !c.isEmpty()) {
-			strings.addAll(c);
+			final List<StringEntry> entries
+					= c.stream()
+							.map((t) -> new StringEntry(t))
+							.collect(Collectors.toList());
+			strings.addAll(entries);
 		}
 		return this;
 	}
 
 	/**
-	 * Adds the key and value to the values within this
-	 * SeparatedString.
+	 * Adds the key and value to the values within this SeparatedString.
 	 *
 	 * @param key the label for the value
 	 * @param value the value to be stored
 	 * @return this SeparatedString
 	 */
 	public SeparatedString add(String key, String value) {
-		strings.add(key + getKeyValueSeparator() + value);
+		strings.add(StringEntry.of(key, value));
 		return this;
 	}
 
@@ -377,7 +362,7 @@ public class SeparatedString {
 	public SeparatedString addAll(Map<String, String> c) {
 		if (c != null && !c.isEmpty()) {
 			c.forEach((key, value) -> {
-				strings.add(key + getKeyValueSeparator() + value);
+				strings.add(StringEntry.of(key, value));
 			});
 		}
 		return this;
@@ -404,7 +389,11 @@ public class SeparatedString {
 	 * @return this SeparatedString
 	 */
 	public SeparatedString addAll(String... strs) {
-		final List<String> asList = Arrays.asList(strs);
+		final List<StringEntry> asList
+				= Arrays.asList(strs)
+						.stream()
+						.map((t) -> new StringEntry(t))
+						.collect(Collectors.toList());
 		if (asList != null) {
 			strings.addAll(asList);
 		}
@@ -434,7 +423,11 @@ public class SeparatedString {
 	 * @return this SeparatedString
 	 */
 	public <TYPE> SeparatedString addAll(Function<TYPE, String> stringProcessor, List<TYPE> objects) {
-		final List<String> asList = objects.stream().map(stringProcessor).collect(Collectors.toList());
+		final List<StringEntry> asList
+				= objects.stream()
+						.map(stringProcessor)
+						.map(t -> StringEntry.of(t))
+						.collect(Collectors.toList());
 		if (asList != null) {
 			strings.addAll(asList);
 		}
@@ -463,7 +456,7 @@ public class SeparatedString {
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
 	public SeparatedString add(int index, String element) {
-		strings.add(index, element);
+		strings.add(index, StringEntry.of(element));
 		return this;
 	}
 
@@ -475,7 +468,7 @@ public class SeparatedString {
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
 	public SeparatedString add(String string) {
-		strings.add(string);
+		strings.add(StringEntry.of(string));
 		return this;
 	}
 
@@ -490,7 +483,7 @@ public class SeparatedString {
 		if (string == null) {
 			strings.add(null);
 		} else {
-			strings.add(string.toString());
+			strings.add(StringEntry.of(string.toString()));
 		}
 		return this;
 	}
@@ -516,11 +509,10 @@ public class SeparatedString {
 	/**
 	 * @return the strings
 	 */
-	public ArrayList<String> getStrings() {
-		ArrayList<String> arrayList = new ArrayList<String>(strings);
-		return arrayList;
-	}
-
+//	public ArrayList<String> getStrings() {
+//		ArrayList<String> arrayList = new ArrayList<String>(strings);
+//		return arrayList;
+//	}
 	/**
 	 * @return the prefix
 	 */
@@ -987,5 +979,17 @@ public class SeparatedString {
 	 */
 	public boolean hasAsymetricWrapping() {
 		return !hasSymetricWrapping();
+	}
+
+	public String getEmptyValue() {
+		return useWhenEmpty;
+	}
+
+	public MapList<String, String> getReplacementSequences() {
+		return getCtrlSequences();
+	}
+
+	public boolean getRetainNulls() {
+		return retainNulls;
 	}
 }
