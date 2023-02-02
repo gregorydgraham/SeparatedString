@@ -30,13 +30,8 @@
  */
 package nz.co.gregs.separatedstring;
 
+import java.util.*;
 import nz.co.gregs.separatedstring.util.MapList;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import nz.co.gregs.separatedstring.util.StringEntry;
@@ -84,6 +79,7 @@ public class SeparatedString {
 	private boolean closedLoop = false;
 	private boolean trimBlanks = false;
 	private boolean retainNulls = false;
+	private boolean uniqueValuesOnly = false;
 
 	SeparatedString() {
 	}
@@ -106,6 +102,17 @@ public class SeparatedString {
 	 */
 	public SeparatedString trimBlanks() {
 		this.trimBlanks = true;
+		return this;
+	}
+
+	/**
+	 * Sets the SeparatedString to trim leading and trailing blanks during
+	 * processing.
+	 *
+	 * @return this SeparatedString with the trim blanks status set to true
+	 */
+	public SeparatedString withOnlyUniqueValues() {
+		this.uniqueValuesOnly = true;
 		return this;
 	}
 
@@ -219,6 +226,7 @@ public class SeparatedString {
 	@Override
 	public synchronized String toString() {
 		final ArrayList<StringEntry> allTheElements = strings;
+		List<String> previousElements = new ArrayList<String>(0);
 		if (allTheElements.isEmpty()) {
 			return useWhenEmpty;
 		} else {
@@ -231,6 +239,11 @@ public class SeparatedString {
 				if (trimBlanks && element.isEmpty()) {
 				} else {
 					String str = element.getFormattedString(this);
+					if (uniqueValuesOnly && previousElements.contains(str)) {
+						break;
+					} else {
+						previousElements.add(str);
+					}
 					if (retainNulls) {
 						currentElement = getWrapBefore() + str + getWrapAfter();
 					} else {
@@ -760,7 +773,8 @@ public class SeparatedString {
 	 * SeparatedString
 	 */
 	public List<String> parseToList(String input) {
-		List<String> output = new ArrayList<>();
+		List<String> output = new ArrayList<>(0);
+		Set<String> previousElements = new HashSet<String>(0);
 		if (input == null || input.isEmpty()) {
 			return output;
 		}
@@ -833,12 +847,12 @@ public class SeparatedString {
 					// but in an unquoted value it is the end of the value
 					isInValue = false;
 					// and we need to add the value to the list
-					output.add(val.toString());
+					checkUniquenessRequirementsAndAdd(output, val.toString(), previousElements);
 					// and clear the val
 					val = new StringBuilder();
 				} else {
 					// edge case: we're not in a value but we found a comma so its an empty value
-					output.add("");
+					checkUniquenessRequirementsAndAdd(output, "", previousElements);
 				}
 				// Move past the separator
 				i = i + separatorString.length() - 1;
@@ -858,8 +872,19 @@ public class SeparatedString {
 		}
 		// The last value doesn't have a terminator so we'll need to add it as well
 		// Note that this means all lines have at least one value even when they're empty
-		output.add(val.toString());
-		return output;
+		checkUniquenessRequirementsAndAdd(output, val.toString(), previousElements);
+		return new ArrayList<>(output);
+	}
+
+	private void checkUniquenessRequirementsAndAdd(List<String> list, String candidate, Set<String> previousEntries) {
+		if (uniqueValuesOnly) {
+			if (!previousEntries.contains(candidate)) {
+				list.add(candidate);
+				previousEntries.add(candidate);
+			}
+		} else {
+			list.add(candidate);
+		}
 	}
 
 	/**
