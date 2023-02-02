@@ -78,30 +78,68 @@ public class SeparatedStringTest {
 	@Test
 	public void testSimpleParsingWithNullsRetained() {
 		final SeparatedString sepString = SeparatedStringBuilder.byCommas().withNullsRetained(true);
-		sepString.addAll("aaa", "bbb", "ccc", null);
+		sepString.addAll("aaa", "bbb", "ddd", "ccc", null);
 		final String encoded = sepString.toString();
-		assertThat(encoded, is("aaa,bbb,ccc,null"));
+		assertThat(encoded, is("aaa,bbb,ddd,ccc,null"));
 
 		String[] parsed = sepString.parseToArray(encoded);
-		assertThat(parsed.length, is(4));
+		assertThat(parsed.length, is(5));
 		assertThat(parsed[0], is("aaa"));
 		assertThat(parsed[1], is("bbb"));
-		assertThat(parsed[2], is("ccc"));
-		assertThat(parsed[3], is("null"));
+		assertThat(parsed[2], is("ddd"));
+		assertThat(parsed[3], is("ccc"));
+		assertThat(parsed[4], is("null"));
 	}
 
 	@Test
 	public void testCommaSpaceParsing() {
 		final SeparatedString sepString = SeparatedStringBuilder.byCommaSpace();
-		sepString.addAll("aaa", "bbb", "ccc");
+		sepString.addAll("aaa", "bbb", "ddd", "ccc");
 		final String encoded = sepString.toString();
-		assertThat(encoded, is("aaa, bbb, ccc"));
+		assertThat(encoded, is("aaa, bbb, ddd, ccc"));
 
 		String[] parsed = sepString.parseToArray(encoded);
-		assertThat(parsed.length, is(3));
+		assertThat(parsed.length, is(4));
 		assertThat(parsed[0], is("aaa"));
 		assertThat(parsed[1], is("bbb"));
-		assertThat(parsed[2], is("ccc"));
+		assertThat(parsed[2], is("ddd"));
+		assertThat(parsed[3], is("ccc"));
+	}
+
+	@Test
+	public void testCommaSpaceParsingWithOnlyUniqueValues() {
+		final SeparatedString sepString
+				= SeparatedStringBuilder
+						.byCommaSpace()
+						.withOnlyUniqueValues();
+		sepString.addAll("aaa", "bbb", "ddd", "ccc", "aaa", "ccc");
+		final String encoded = sepString.toString();
+		assertThat(encoded, is("aaa, bbb, ddd, ccc"));
+
+		String[] parsed = sepString.parseToArray(encoded);
+		assertThat(parsed.length, is(4));
+		assertThat(parsed[0], is("aaa"));
+		assertThat(parsed[1], is("bbb"));
+		assertThat(parsed[2], is("ddd"));
+		assertThat(parsed[3], is("ccc"));
+	}
+
+	@Test
+	public void testCommaSpaceParsingWithOnlyUniqueValuesFromInput() {
+		final SeparatedString sepString
+				= SeparatedStringBuilder
+						.byCommaSpace();
+		sepString.addAll("aaa", "bbb", "ddd","ccc", "aaa", "ccc");
+		final String encoded = sepString.toString();
+		assertThat(encoded, is("aaa, bbb, ddd, ccc, aaa, ccc"));
+
+		String[] parsed = SeparatedStringBuilder
+						.byCommaSpace().withOnlyUniqueValues().parseToArray(encoded);
+		assertThat(parsed.length, is(4));
+		assertThat(parsed[0], is("aaa"));
+		assertThat(parsed[1], is("bbb"));
+		assertThat(parsed[2], is("ddd"));
+		assertThat(parsed[3], is("ccc"));
 	}
 
 	@Test
