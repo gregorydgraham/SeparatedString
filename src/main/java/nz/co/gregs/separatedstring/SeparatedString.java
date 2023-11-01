@@ -205,13 +205,54 @@ public class SeparatedString {
 	 * Encodes the contents as per the setup of the SeparatedString.
 	 *
 	 * <p>
-	 * for instance a {@code SeparatedString.commaSeparated().addAll("1","2","3")}
-	 * will return "1,2,3".</p>
+	 * for instance a
+	 * {@code SeparatedString.commaSeparated().addAll("1","2","3").encode()} will
+	 * return "1,2,3".</p>
 	 *
 	 * @return returns the SeparatedString's contents encoded as a String
 	 */
 	public String encode() {
 		return toString();
+	}
+
+	/**
+	 * Encodes the provided Strings as per the setup of the SeparatedString.
+	 *
+	 * <p>
+	 * for instance a {@code SeparatedString.commaSeparated().encode("1","2","3")}
+	 * will return "1,2,3".</p>
+	 *
+	 * <p>
+	 * No values are added to this SeparatedString and no values within this
+	 * SeparatedString are useds in the encoding</p>
+	 *
+	 * @param strs the Strings to be encoded as separated string
+	 * @return returns the SeparatedString's contents encoded as a String
+	 */
+	public String encode(String... strs) {
+		SeparatedString newVersion = duplicateSettingsOf(this);
+		String encode = newVersion.addAll(strs).encode();
+		return encode;
+	}
+
+	/**
+	 * Encodes the provided Strings as per the setup of the SeparatedString.
+	 *
+	 * <p>
+	 * for instance a {@code SeparatedString.commaSeparated().encode("1","2","3")}
+	 * will return "1,2,3".</p>
+	 *
+	 * <p>
+	 * No values are added to this SeparatedString and no values within this
+	 * SeparatedString are used in the encoding</p>
+	 *
+	 * @param strs the Strings to be encoded as separated string
+	 * @return returns the SeparatedString's contents encoded as a String
+	 */
+	public String encode(List<String> strs) {
+		SeparatedString newVersion = duplicateSettingsOf(this);
+		String encode = newVersion.addAll(strs).encode();
+		return encode;
 	}
 
 	/**
@@ -1016,5 +1057,22 @@ public class SeparatedString {
 
 	public boolean getRetainNulls() {
 		return retainNulls;
+	}
+
+	private SeparatedString duplicateSettingsOf(SeparatedString sepString) {
+		SeparatedString newVersion = new SeparatedString();
+		newVersion.separator = sepString.separator;
+		newVersion.prefix = sepString.prefix;
+		newVersion.suffix = sepString.suffix;
+		newVersion.wrapBefore = sepString.wrapBefore;
+		newVersion.wrapAfter = sepString.wrapAfter;
+		newVersion.escapeChar = sepString.escapeChar;
+		newVersion.useWhenEmpty = sepString.useWhenEmpty;
+		newVersion.keyValueSeparator = sepString.keyValueSeparator;
+		newVersion.closedLoop = sepString.closedLoop;
+		newVersion.trimBlanks = sepString.trimBlanks;
+		newVersion.retainNulls = sepString.retainNulls;
+		newVersion.uniqueValuesOnly = sepString.uniqueValuesOnly;
+		return newVersion;
 	}
 }

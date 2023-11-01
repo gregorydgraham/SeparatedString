@@ -30,6 +30,9 @@
  */
 package nz.co.gregs.separatedstring.api;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import nz.co.gregs.separatedstring.SeparatedString;
 import nz.co.gregs.separatedstring.SeparatedStringBuilder;
@@ -96,6 +99,35 @@ public class SeparatedStringTest {
 		final SeparatedString sepString = SeparatedStringBuilder.byCommaSpace();
 		sepString.addAll("aaa", "bbb", "ddd", "ccc");
 		final String encoded = sepString.toString();
+		assertThat(encoded, is("aaa, bbb, ddd, ccc"));
+
+		String[] parsed = sepString.parseToArray(encoded);
+		assertThat(parsed.length, is(4));
+		assertThat(parsed[0], is("aaa"));
+		assertThat(parsed[1], is("bbb"));
+		assertThat(parsed[2], is("ddd"));
+		assertThat(parsed[3], is("ccc"));
+	}
+
+	@Test
+	public void testCommaSpaceParsingUsingEncodeStringArray() {
+		final SeparatedString sepString = SeparatedStringBuilder.byCommaSpace();
+		String encoded = sepString.encode("aaa", "bbb", "ddd", "ccc");
+		assertThat(encoded, is("aaa, bbb, ddd, ccc"));
+
+		String[] parsed = sepString.parseToArray(encoded);
+		assertThat(parsed.length, is(4));
+		assertThat(parsed[0], is("aaa"));
+		assertThat(parsed[1], is("bbb"));
+		assertThat(parsed[2], is("ddd"));
+		assertThat(parsed[3], is("ccc"));
+	}
+
+	@Test
+	public void testCommaSpaceParsingUsingEncodeStringList() {
+		List<String> arrayList = Arrays.asList(new String[]{"aaa", "bbb", "ddd", "ccc"});
+		final SeparatedString sepString = SeparatedStringBuilder.byCommaSpace();
+		String encoded = sepString.encode(arrayList);
 		assertThat(encoded, is("aaa, bbb, ddd, ccc"));
 
 		String[] parsed = sepString.parseToArray(encoded);
