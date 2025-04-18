@@ -58,14 +58,6 @@
     <maven.compiler.target>10</maven.compiler.target>
   </properties>
   <distributionManagement>
-    <!--		<snapshotRepository>
-      <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>-->
   </distributionManagement>
   <profiles>
     <profile> 
@@ -122,13 +114,15 @@
   <build>
     <plugins>
       <!-- 
-        With the SCM connection configured correctly you can perform a release deployment to OSSRH with
+        You can perform a release deployment to Sonatype Central with
       
         "mvn release:clean release:prepare"
         
         then answering the prompts for versions and tags, followed by
       
         "mvn release:perform"
+        
+        Beware though: bit-rot occurs and things have probably changed
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
