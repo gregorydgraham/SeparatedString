@@ -52,13 +52,16 @@
       <type>jar</type>
     </dependency>
   </dependencies>
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>10</maven.compiler.source>
     <maven.compiler.target>10</maven.compiler.target>
   </properties>
+  
   <distributionManagement>
   </distributionManagement>
+  
   <profiles>
     <profile> 
       <id>release</id>
@@ -79,6 +82,20 @@
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.7</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
             <version>3.11.2</version>
             <configuration>
@@ -93,20 +110,19 @@
               </execution>
             </executions>
           </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.7</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.7.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>sonatype-central</publishingServerId>
+          <centralBaseUrl>https://central.sonatype.com</centralBaseUrl>
+          <autoPublish>true</autoPublish>
+          <waitUntil>published</waitUntil>
+          <failOnBuildFailure>true</failOnBuildFailure>
+        </configuration>
+      </plugin>
         </plugins>
       </build>
     </profile>
@@ -135,19 +151,6 @@
           <!-- release profile as defined by Sonatype -->
           <releaseProfiles>release</releaseProfiles>
           <goals>deploy</goals>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.sonatype.central</groupId>
-        <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.7.0</version>
-        <extensions>true</extensions>
-        <configuration>
-          <publishingServerId>sonatype-central</publishingServerId>
-          <centralBaseUrl>https://central.sonatype.com</centralBaseUrl>
-          <autoPublish>true</autoPublish>
-          <waitUntil>published</waitUntil>
-          <failOnBuildFailure>true</failOnBuildFailure>
         </configuration>
       </plugin>
       <plugin>
