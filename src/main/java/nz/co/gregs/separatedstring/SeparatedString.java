@@ -266,42 +266,60 @@ public class SeparatedString {
 	 */
 	@Override
 	public synchronized String toString() {
-		final ArrayList<StringEntry> allTheElements = strings;
-		List<String> previousElements = new ArrayList<String>(0);
-		if (allTheElements.isEmpty()) {
+		final ArrayList<StringEntry> allTheEntries = strings;
+		List<String> previousElements = new ArrayList<>(0);
+		if (allTheEntries.isEmpty()) {
 			return useWhenEmpty;
 		} else {
 			StringBuilder strs = new StringBuilder();
 			String sep = "";
 
-			String currentElement = "";
-			String firstElement = null;
-			for (StringEntry element : allTheElements) {
-				if (trimBlanks && element.isEmpty()) {
+			String currentEntry = "";
+			String firstEntry = null;
+			for (StringEntry entry : allTheEntries) {
+				if (trimBlanks && entry.isEmpty()) {
 				} else {
-					String str = element.getFormattedString(this);
+					String str = formatStringEntry(entry);
 					if (uniqueValuesOnly && previousElements.contains(str)) {
 						break;
 					} else {
 						previousElements.add(str);
 					}
 					if (retainNulls) {
-						currentElement = getWrapBefore() + str + getWrapAfter();
+						currentEntry = getWrapBefore() + str + getWrapAfter();
 					} else {
-						currentElement = getWrapBefore() + (str == null ? "" : str) + getWrapAfter();
+						currentEntry = getWrapBefore() + (str == null ? "" : str) + getWrapAfter();
 					}
-					if (firstElement == null) {
-						firstElement = currentElement;
+					if (firstEntry == null) {
+						firstEntry = currentEntry;
 					}
-					strs.append(sep).append(currentElement);
+					strs.append(sep).append(currentEntry);
 					sep = this.getSeparator();
 				}
 			}
-			if (this.closedLoop && firstElement != null && !firstElement.equals(currentElement)) {
-				strs.append(sep).append(firstElement);
+			if (this.closedLoop && firstEntry != null && !firstEntry.equals(currentEntry)) {
+				strs.append(sep).append(firstEntry);
 			}
 			return getPrefix() + strs.toString() + getSuffix();
 		}
+	}
+  
+  private String formatStringEntry(StringEntry element) {
+		StringBuilder build = new StringBuilder();
+		if (element.hasKey()) {
+			build.append(replaceSequencesInString(element.getKey(), getReplacementSequences()));
+			build.append(getKeyValueSeparator());
+		}
+		String value = element.getValue();
+		if (value == null && !getRetainNulls()) {
+			value = getEmptyValue();
+		}
+		if (value != null && value.isEmpty()) {
+			value = getEmptyValue();
+		}
+		build.append(replaceSequencesInString(value, getReplacementSequences()));
+
+		return build.toString();
 	}
 
 	private synchronized MapList<String, String> getCtrlSequences() {
@@ -324,6 +342,24 @@ public class SeparatedString {
 		list.add(wrapAfter, escapeChar + wrapAfter);
 		list.add(wrapBefore, escapeChar + wrapBefore);
 		return list;
+	}
+	private String replaceSequencesInString(String s, MapList<String, String> sequences) {
+		if (s == null) {
+			return s;
+		} else {
+			String result = s;
+			for (var seq : sequences) {
+				final String seqKey = seq.getKey();
+				if (seqKey != null && !seqKey.isEmpty()) {
+					String value = seq.getValue();
+					if (value == null || value.isEmpty()) {
+						value = "";
+					}
+					result = result.replace(seqKey, value);
+				}
+			}
+			return result;
+		}
 	}
 
 	/**
@@ -554,27 +590,33 @@ public class SeparatedString {
 	}
 
 	/**
-	 * @return the separator
+   * Returns the character sequence used to distinguish between values within the SeparatedString.
+   * 
+   * <p>
+   * For instance a classical CSV could a "," - "a,b,c,d,e" where as date string might use a "/" - "2022/02/13</p>
+   * 
+   * <p>
+   * SeparatedString uses a String as the separator so more complex values are supported: ", " for instance produces the much prettier "a, b, c, d, e"</p>
+   * 
+	 * @return the separator value
 	 */
 	public String getSeparator() {
 		return separator;
 	}
-
+  
 	/**
-	 * @return the strings
-	 */
-//	public ArrayList<String> getStrings() {
-//		ArrayList<String> arrayList = new ArrayList<String>(strings);
-//		return arrayList;
-//	}
-	/**
+   * Returns the string to be placed added BEFORE all other values in the SeparatedString
+   * 
+   * <p>to encode an array of values as "[a,b,c,d,e]" use <code>withPrefix("[").withSeparator(",").withsuffix("]")</code> for example.</p>
+	 *
+   * 
 	 * @return the prefix
 	 */
 	public String getPrefix() {
 		return prefix;
 	}
 
-	/**
+	/** Returns the string to be placed added AFTER all other values in the SeparatedString
 	 * @return the suffix
 	 */
 	public String getSuffix() {
@@ -582,6 +624,10 @@ public class SeparatedString {
 	}
 
 	/**
+   * Returns the value used to indicate the start of a value.
+   * 
+   * <p>Not to be confused with the separator, more commonly the doublequotes than the comma</p>
+   * 
 	 * @return the wrapBefore
 	 */
 	public String getWrapBefore() {
@@ -589,6 +635,9 @@ public class SeparatedString {
 	}
 
 	/**
+   * Returns the value used to indicate the end of a value.
+   * 
+   * <p>Not to be confused with the separator, more commonly the doublequotes than the comma</p>
 	 * @return the wrapAfter
 	 */
 	public String getWrapAfter() {
@@ -596,6 +645,8 @@ public class SeparatedString {
 	}
 
 	/**
+   * Returns the value used to indicate that the following string should not be interpreted as a control sequence.
+   * 
 	 * @return the escapeChar
 	 */
 	public String getEscapeChar() {
@@ -746,6 +797,8 @@ public class SeparatedString {
 
 	/**
 	 * Adds a value to be placed at the beginning of the string before any values.
+   * 
+   * <p>to encode an array of values as "[a,b,c,d,e]" use <code>withPrefix("[").withSeparator(",").withsuffix("]")</code> for example.</p>
 	 *
 	 * @param placeAtTheBeginningOfTheString the very first item in the encoded
 	 * result
@@ -758,6 +811,8 @@ public class SeparatedString {
 
 	/**
 	 * Adds a value to be placed at the very end of the encoded string/
+	 *
+   * <p>to encode an array of values as "[a,b,c,d,e]" use <code>withPrefix("[").withSeparator(",").withsuffix("]")</code> for example.</p>
 	 *
 	 * @param placeAtTheEndOfTheString the last item in the encode result
 	 * @return this SeparatedString
@@ -815,7 +870,7 @@ public class SeparatedString {
 	 */
 	public List<String> parseToList(String input) {
 		List<String> output = new ArrayList<>(0);
-		Set<String> previousElements = new HashSet<String>(0);
+		Set<String> previousElements = new HashSet<>(0);
 		if (input == null || input.isEmpty()) {
 			return output;
 		}
@@ -936,7 +991,7 @@ public class SeparatedString {
 	 * @return the values found
 	 */
 	public String[] parseToArray(String input) {
-		return parseToList(input).toArray(new String[]{});
+		return parseToList(input).toArray(new String[0]);
 	}
 
 	/**
@@ -1015,7 +1070,7 @@ public class SeparatedString {
 	}
 
 	/**
-	 * Checks if a suffux has been defined.
+	 * Checks if a suffix has been defined.
 	 *
 	 * @return TRUE if a suffix has been defined
 	 */
@@ -1047,11 +1102,24 @@ public class SeparatedString {
 		return !hasSymetricWrapping();
 	}
 
-	public String getEmptyValue() {
+/**
+ * Returns the value used when there is no value.
+ * 
+ * <p>If there is a special value to use when there is no value, &lt;NULL&gt; for instance, {@link #useWhenEmpty(java.lang.String) } 
+ * sets the value to be used and this method is used to retrieve that value.</p>
+ * 
+ * @return the empty value
+ */
+  public String getEmptyValue() {
 		return useWhenEmpty;
 	}
 
-	public MapList<String, String> getReplacementSequences() {
+/**
+ * 
+ * 
+   * @return the list of replacement sequences
+ */
+  public MapList<String, String> getReplacementSequences() {
 		return getCtrlSequences();
 	}
 
