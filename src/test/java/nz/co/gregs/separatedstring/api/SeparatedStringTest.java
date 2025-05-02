@@ -120,6 +120,63 @@ public class SeparatedStringTest {
   }
 
   @Test
+  public void testTSVWithMultipleLines() {
+    final SeparatedString tsv = SeparatedStringBuilder.byTabs();
+    final String lineSep = System.lineSeparator();
+    tsv.addLine("a", "1");
+    tsv.addLine("b", "2");
+    tsv.addLine("c", "3");
+    System.out.println("ENCODED: " + lineSep + tsv.encode() + "_____");
+    assertThat(tsv.encode(), is("a\t1" + lineSep + "b\t2" + lineSep + "c\t3" + lineSep));
+
+    String[] parsed = tsv.parseToArray(tsv.encode());
+    for (String parsed1 : parsed) {
+      System.out.println("[" + parsed1 + "]");
+    }
+    assertThat(parsed.length, is(7));
+    assertThat(parsed[0], is("a"));
+    assertThat(parsed[1], is("1"));
+    assertThat(parsed[2], is("b"));
+    assertThat(parsed[3], is("2"));
+    assertThat(parsed[4], is("c"));
+    assertThat(parsed[5], is("3"));
+    // the last line is blank
+    assertThat(parsed[6], is(""));
+
+    tsv.addAll("d", "4");
+    System.out.println("CSV: " + tsv.encode());
+    parsed = tsv.parseToArray(tsv.encode());
+    for (String parsed1 : parsed) {
+      System.out.println("[" + parsed1 + "]");
+    }
+    assertThat(parsed.length, is(8));
+    assertThat(parsed[0], is("a"));
+    assertThat(parsed[1], is("1"));
+    assertThat(parsed[2], is("b"));
+    assertThat(parsed[3], is("2"));
+    assertThat(parsed[4], is("c"));
+    assertThat(parsed[5], is("3"));
+    assertThat(parsed[6], is("d"));
+    assertThat(parsed[7], is("4"));
+
+//    List<List<String>> lines = csv.parseToArray(csv.parseToLineList(csv.encode()));
+//    for (List<String> line : lines) {
+//      for (String val : line) {
+//        System.out.println("[" + val + "]");
+//      }
+//    }
+//    assertThat(lines.size(), is(4));
+//    assertThat(lines.get(0).get(0), is("a"));
+//    assertThat(lines.get(0).get(1), is("1"));
+//    assertThat(lines.get(1).get(0), is("b"));
+//    assertThat(lines.get(1).get(1), is("2"));
+//    assertThat(lines.get(2).get(0), is("c"));
+//    assertThat(lines.get(2).get(1), is("3"));
+//    assertThat(lines.get(3).get(0), is("d"));
+//    assertThat(lines.get(3).get(1), is("4"));
+  }
+
+  @Test
   public void testSimpleParsingWithNulls() {
     final SeparatedString sepString = SeparatedStringBuilder.byCommas();
     sepString.addAll("aaa", "bbb", "ccc", null);
