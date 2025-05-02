@@ -11,13 +11,7 @@ package nz.co.gregs.separatedstring.util;
  */
 public class StringEntry {
 
-	public static StringEntry of(String value) {
-		return new StringEntry(value);
-	}
-
-	public static StringEntry of(String key, String value) {
-		return new StringEntry(key, value);
-	}
+  private static StringEntry END_OF_LINE_MARKER = new StringEntry();
 
 	private boolean hasKey = false;
 	private String key;
@@ -36,6 +30,17 @@ public class StringEntry {
 		hasKey = true;
 	}
 
+	public static StringEntry of(String value) {
+		return new StringEntry(value);
+	}
+
+	public static StringEntry of(String key, String value) {
+		return new StringEntry(key, value);
+	}
+  public static StringEntry getEndOfLineMarker() {
+    return END_OF_LINE_MARKER;
+  }
+  
 	/**
 	 * @return the isEmpty
 	 */
@@ -63,5 +68,9 @@ public class StringEntry {
 	public String getValue() {
 		return entry;
 	}
+
+  public boolean isEndOfLineMarker() {
+    return StringEntry.END_OF_LINE_MARKER.equals(this);
+  }
 
 }
