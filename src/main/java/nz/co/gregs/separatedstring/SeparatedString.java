@@ -305,7 +305,7 @@ public class SeparatedString {
     // but I'm using a list as we need the escape sequence to be processed first.
     // This discussion has been implemented as MapList
     //
-    // the key/value relationship is handled by the Pair<String, String> entry class
+    // the key/value relationship is handled by the <String, String> entry class
     // and duplicate etc handling is covered in addToList()
     MapList<String, String> list = new MapList<>(8);
     // the escape sequence needs to be first so we don't escape our own escapes
@@ -850,11 +850,27 @@ public class SeparatedString {
    * @param input the string to be decoded
    * @return a list of values as defined by the string and the settings of this SeparatedString
    */
-  public synchronized List<String> parseToList(String input) {
-    ArrayList<String> outputToList = new ArrayList<>(0);
+  public List<String> parseToList(String input) {
+    return parse(input).values;
+  }
+
+
+  /**
+   * Decode the string provided and return a list of values.
+   *
+   *
+   * @param input the string to be decoded
+   * @return a list of values as defined by the string and the settings of this SeparatedString
+   */
+  public List<List<String>> parseToLines(String input) {
+    return parse(input).lines;
+  }
+
+  private synchronized ParseResults parse(String input) {
+    ParseResults results = new ParseResults();
     Set<String> previousElements = new HashSet<>(0);
     if (input == null || input.isEmpty()) {
-      return outputToList;
+      return results;
     }
     String line = input;
     if (hasPrefix()) {
@@ -865,6 +881,7 @@ public class SeparatedString {
     }
     // we'll be scanning through the line so we need to collect the characters as we go
     StringBuilder val = new StringBuilder();
+    List<String> currentLine = new ArrayList<>(0);
     // we'll need to keep track of what is happening
     // firstly, are we inside a value?
     boolean isInValue = false;
@@ -925,12 +942,12 @@ public class SeparatedString {
           // but in an unquoted value it is the end of the value
           isInValue = false;
           // and we need to add the value to the list
-          checkUniquenessRequirementsAndAdd(outputToList, val.toString(), previousElements);
+          checkUniquenessRequirementsAndAdd(results.values, val.toString(), previousElements, currentLine);
           // and clear the val
           val = new StringBuilder();
         } else {
           // edge case: we're not in a value but we found a comma so its an empty value
-          checkUniquenessRequirementsAndAdd(outputToList, "", previousElements);
+          checkUniquenessRequirementsAndAdd(results.values, "", previousElements, currentLine);
         }
         // Move past the separator
         i = i + separatorString.length() - 1;
@@ -938,9 +955,13 @@ public class SeparatedString {
         // we have found a new line
         isInValue = false;
         // and we need to add the value to the list
-        checkUniquenessRequirementsAndAdd(outputToList, val.toString(), previousElements);
+        checkUniquenessRequirementsAndAdd(results.values, val.toString(), previousElements, currentLine);
         // and clear the val
         val = new StringBuilder();
+        // add the completed line
+        results.lines.add(currentLine);
+        // and make a new blank currentLine
+        currentLine = new ArrayList<>(0);
         // Move past the newline
         i = i + lineEndString.length() - 1;
       } else if (chr == ' ') {
@@ -959,18 +980,28 @@ public class SeparatedString {
     }
     // The last value doesn't have a terminator so we'll need to add it as well
     // Note that this means all lines have at least one value even when they're empty
-    checkUniquenessRequirementsAndAdd(outputToList, val.toString(), previousElements);
-    return outputToList;
+    checkUniquenessRequirementsAndAdd(results.values, val.toString(), previousElements, currentLine);
+    // add the completed line
+    results.lines.add(currentLine);
+    return results;
   }
 
-  private void checkUniquenessRequirementsAndAdd(List<String> list, String candidate, Set<String> previousEntries) {
+  private class ParseResults {
+
+    List<List<String>> lines = new ArrayList<>();
+    List<String> values = new ArrayList<>();
+  }
+
+  private void checkUniquenessRequirementsAndAdd(List<String> list, String candidate, Set<String> previousEntries, List<String> currentLine) {
     if (uniqueValuesOnly) {
       if (!previousEntries.contains(candidate)) {
         list.add(candidate);
+        currentLine.add(candidate);
         previousEntries.add(candidate);
       }
     } else {
       list.add(candidate);
+      currentLine.add(candidate);
     }
   }
 
