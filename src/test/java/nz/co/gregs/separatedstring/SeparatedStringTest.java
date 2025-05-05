@@ -30,11 +30,14 @@
  */
 package nz.co.gregs.separatedstring;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import org.junit.Test;
 
 /**
@@ -58,6 +61,19 @@ public class SeparatedStringTest {
     assertThat(parsed[0], is("aaa"));
     assertThat(parsed[1], is("bbb"));
     assertThat(parsed[2], is("ccc"));
+  }
+  
+  @Test
+  public void testSimpleDateFormatting() {
+    SeparatedString sepString = new SeparatedString().separatedBy(", ");
+    sepString.setFormatFor(Instant.class, (Instant d) -> {
+      return (DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault()).format(d));
+    });
+    sepString.addAll("alpha", Instant.ofEpochMilli(0l), "beta");
+    String result = sepString.encode();
+
+    System.out.println("RESULT: " + result);
+    assertThat(result, is("alpha, 1970/01/01, beta"));
   }
 
   @Test
@@ -167,16 +183,46 @@ public class SeparatedStringTest {
   public void testSimpleParsingWithNullsRetained() {
     final SeparatedString sepString = SeparatedStringBuilder.byCommas().withNullsRetained(true);
     sepString.addAll("aaa", "bbb", "ddd", "ccc", null);
-    final String encoded = sepString.toString();
+    String encoded = sepString.toString();
     assertThat(encoded, is("aaa,bbb,ddd,ccc,null"));
+    sepString.addAll("", "fff", "ggg", "hhh");
+    encoded = sepString.toString();
+    assertThat(encoded, is("aaa,bbb,ddd,ccc,null,,fff,ggg,hhh"));
 
     String[] parsed = sepString.parseToArray(encoded);
-    assertThat(parsed.length, is(5));
+    assertThat(parsed.length, is(9));
     assertThat(parsed[0], is("aaa"));
     assertThat(parsed[1], is("bbb"));
     assertThat(parsed[2], is("ddd"));
     assertThat(parsed[3], is("ccc"));
     assertThat(parsed[4], is("null"));
+    assertThat(parsed[5], is(""));
+    assertThat(parsed[6], is("fff"));
+    assertThat(parsed[7], is("ggg"));
+    assertThat(parsed[8], is("hhh"));
+  }
+
+  @Test
+  public void testSimpleParsingWithNullsAs() {
+    final SeparatedString sepString = SeparatedStringBuilder.byCommas().withNullsAs("[NULL]");
+    sepString.addAll("aaa", "bbb", "ddd", "ccc", null);
+    String encoded = sepString.toString();
+    assertThat(encoded, is("aaa,bbb,ddd,ccc,[NULL]"));
+    sepString.addAll("", "fff", "ggg", "hhh");
+    encoded = sepString.toString();
+    assertThat(encoded, is("aaa,bbb,ddd,ccc,[NULL],,fff,ggg,hhh"));
+
+    String[] parsed = sepString.parseToArray(encoded);
+    assertThat(parsed.length, is(9));
+    assertThat(parsed[0], is("aaa"));
+    assertThat(parsed[1], is("bbb"));
+    assertThat(parsed[2], is("ddd"));
+    assertThat(parsed[3], is("ccc"));
+    assertThat(parsed[4], is("[NULL]"));
+    assertThat(parsed[5], is(""));
+    assertThat(parsed[6], is("fff"));
+    assertThat(parsed[7], is("ggg"));
+    assertThat(parsed[8], is("hhh"));
   }
 
   @Test

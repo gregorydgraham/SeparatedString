@@ -61,8 +61,10 @@ import nz.co.gregs.separatedstring.util.StringEntry;
  */
 public class SeparatedString {
 
-  private String separator = " ";
   private final ArrayList<StringEntry> strings = new ArrayList<>();
+  private final HashMap<Class<?>, Function<?, String>> formatters = new HashMap<>();
+
+  private String separator = " ";
   private String prefix = "";
   private String suffix = "";
   private String wrapBefore = "";
@@ -73,6 +75,7 @@ public class SeparatedString {
   private boolean closedLoop = false;
   private boolean trimBlanks = false;
   private boolean retainNulls = false;
+  private String retainNullString = "null";
   private boolean uniqueValuesOnly = false;
   private String lineEnd = "";
 
@@ -248,23 +251,19 @@ public class SeparatedString {
       String currentEntry = "";
       String firstEntry = null;
       for (StringEntry entry : allTheEntries) {
-        if (trimBlanks && entry.isEmpty()) {
+        String entryString = formatStringEntry(entry);
+        if (trimBlanks && entryString.isEmpty()) {
         } else {
           if (entry.isEndOfLineMarker()) {
             strs.append(getLineEnd());
             sep = "";
           } else {
-            String str = formatStringEntry(entry);
-            if (uniqueValuesOnly && previousElements.contains(str)) {
+            if (uniqueValuesOnly && previousElements.contains(entryString)) {
               break;
             } else {
-              previousElements.add(str);
+              previousElements.add(entryString);
             }
-            if (retainNulls) {
-              currentEntry = getWrapBefore() + str + getWrapAfter();
-            } else {
-              currentEntry = getWrapBefore() + (str == null ? "" : str) + getWrapAfter();
-            }
+            currentEntry = getWrapBefore() + entryString + getWrapAfter();
             if (firstEntry == null) {
               firstEntry = currentEntry;
             }
@@ -286,16 +285,68 @@ public class SeparatedString {
       build.append(replaceSequencesInString(element.getKey(), getReplacementSequences()));
       build.append(getKeyValueSeparator());
     }
-    String value = element.getValue();
-    if (value == null && !getRetainNulls()) {
-      value = getEmptyValue();
-    }
-    if (value != null && value.isEmpty()) {
-      value = getEmptyValue();
-    }
-    build.append(replaceSequencesInString(value, getReplacementSequences()));
+    Object object = element.getValue();
+    String string = format(object);
+//    if (string == null && !getRetainNulls()) {
+//      string = getEmptyValue();
+//    }
+//    if (string != null && string.isEmpty()) {
+//      string = getEmptyValue();
+//    }
+    build.append(replaceSequencesInString(string, getReplacementSequences()));
 
     return build.toString();
+  }
+
+  /**
+   * Sets the formatter to use for the object.
+   *
+   * <p>
+   * Normally the toString() method is called on the object, when that does not produce the correct results use this method to supply a better method.</p>
+   *
+   * @param <T> the type of the object to be formatted
+   * @param clazz the class of the object to formatted
+   * @param formatter the method that takes an object of type T and produces a correctly formatted String
+   * @return this SeparatedObjects
+   */
+  public <T> SeparatedString setFormatFor(Class<T> clazz, Function<T, String> formatter) {
+    this.formatters.put(clazz, formatter);
+    return this;
+  }
+
+  private <T> String format(T object) {
+    if (object == null) {
+      // there is no object so just report it
+      if (retainNulls) {
+        // null need to be reported as nulls
+        return retainNullString;
+      } else {
+        // the default is to report it as empty
+        return this.getEmptyValue();
+      }
+    }
+    // look for a formatter
+    Function<T, String> formatter = (Function<T, String>) formatters.get(object.getClass());
+    if (formatter != null) {
+      // apply the formatter and return the result
+      return formatter.apply(object);
+    }
+    // no formatter so return the default encoding
+    return object.toString();
+  }
+  
+  /**
+   * Sets the SeparatedString to retain values and report them using the specified value.
+   * 
+   * <p>for instance to have nulls appears as [NULL] call <code>sepStr.withNullsAs("[NULL]");</code></p>
+   *
+   * @param useInsteadOfNull the value used to indicate a null value
+   * @return this SeparatedString
+   */
+  public SeparatedString withNullsAs(String useInsteadOfNull){
+    retainNulls=true;
+    retainNullString = useInsteadOfNull;
+    return this;
   }
 
   private synchronized MapList<String, String> getCtrlSequences() {
@@ -482,6 +533,16 @@ public class SeparatedString {
    * @return this SeparatedString
    */
   public SeparatedString addAll(String... strs) {
+    return addAll((Object[])strs);
+  }
+
+  /**
+   * Adds all values to the values within this SeparatedString.
+   *
+   * @param strs several objects to be added as values
+   * @return this SeparatedString
+   */
+  public SeparatedString addAll(Object... strs) {
     final List<StringEntry> asList
             = Arrays.asList(strs)
                     .stream()
@@ -854,7 +915,6 @@ public class SeparatedString {
     return parse(input).values;
   }
 
-
   /**
    * Decode the string provided and return a list of values.
    *
@@ -942,7 +1002,7 @@ public class SeparatedString {
           // but in an unquoted value it is the end of the value
           isInValue = false;
           // and we need to add the value to the list
-          checkUniquenessRequirementsAndAdd(results.values, val.toString(), previousElements, currentLine);
+          checkUniquenessRequirementsAndAdd(results.values, format(val), previousElements, currentLine);
           // and clear the val
           val = new StringBuilder();
         } else {
@@ -955,7 +1015,7 @@ public class SeparatedString {
         // we have found a new line
         isInValue = false;
         // and we need to add the value to the list
-        checkUniquenessRequirementsAndAdd(results.values, val.toString(), previousElements, currentLine);
+        checkUniquenessRequirementsAndAdd(results.values, format(val), previousElements, currentLine);
         // and clear the val
         val = new StringBuilder();
         // add the completed line
@@ -980,10 +1040,11 @@ public class SeparatedString {
     }
     // The last value doesn't have a terminator so we'll need to add it as well
     // Note that this means all lines have at least one value even when they're empty
-    checkUniquenessRequirementsAndAdd(results.values, val.toString(), previousElements, currentLine);
+    checkUniquenessRequirementsAndAdd(results.values, format(val), previousElements, currentLine);
     // add the completed line
     results.lines.add(currentLine);
     return results;
+
   }
 
   private class ParseResults {

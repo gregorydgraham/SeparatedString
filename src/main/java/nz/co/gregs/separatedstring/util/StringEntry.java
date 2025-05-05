@@ -13,61 +13,63 @@ public class StringEntry {
 
   private static StringEntry END_OF_LINE_MARKER = new StringEntry();
 
-	private boolean hasKey = false;
-	private String key;
-	private String entry;
+  private boolean hasKey = false;
+  private String key;
+  private Object entry;
 
-	public StringEntry() {
-	}
+  private StringEntry() {
+  }
 
-	public StringEntry(String value) {
-		entry = value;
-	}
+  public StringEntry(Object value) {
+    entry = value;
+  }
 
-	public StringEntry(String key, String value) {
-		this(value);
-		this.key = key;
-		hasKey = true;
-	}
+  public StringEntry(String key, Object value) {
+    this(value);
+    this.key = key;
+    hasKey = true;
+  }
 
-	public static StringEntry of(String value) {
-		return new StringEntry(value);
-	}
+  public static StringEntry of(String value) {
+    return new StringEntry(value);
+  }
 
-	public static StringEntry of(String key, String value) {
-		return new StringEntry(key, value);
-	}
+  protected static StringEntry of(Object value) {
+    return new StringEntry(value);
+  }
+
+  public static StringEntry of(String key, String value) {
+    return new StringEntry(key, value);
+  }
+
+  public static StringEntry of(String key, Object value) {
+    return new StringEntry(key, value);
+  }
+
   public static StringEntry getEndOfLineMarker() {
     return END_OF_LINE_MARKER;
   }
-  
-	/**
-	 * @return the isEmpty
-	 */
-	public boolean isEmpty() {
-		return entry.isEmpty();
-	}
 
-	/**
-	 * @return the hasKey
-	 */
-	public boolean hasKey() {
-		return hasKey;
-	}
+  /**
+   * @return the hasKey
+   */
+  public boolean hasKey() {
+    return hasKey;
+  }
 
-	/**
-	 * @return the key
-	 */
-	public String getKey() {
-		return key;
-	}
+  /**
+   * @return the key
+   */
+  public String getKey() {
+    return key;
+  }
 
-	/**
-	 * @return the entry
-	 */
-	public String getValue() {
-		return entry;
-	}
+  /**
+   * @return the entry
+   */
+  public Object getValue() {
+    return entry;
+  }
 
   public boolean isEndOfLineMarker() {
     return StringEntry.END_OF_LINE_MARKER.equals(this);
