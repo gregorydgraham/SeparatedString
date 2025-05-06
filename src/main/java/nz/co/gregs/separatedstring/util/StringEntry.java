@@ -34,7 +34,7 @@ public class StringEntry {
     return new StringEntry(value);
   }
 
-  protected static StringEntry of(Object value) {
+  public static StringEntry of(Object value) {
     return new StringEntry(value);
   }
 

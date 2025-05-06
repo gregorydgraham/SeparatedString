@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import nz.co.gregs.looper.Looper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import org.junit.Test;
@@ -62,7 +63,7 @@ public class SeparatedStringTest {
     assertThat(parsed[1], is("bbb"));
     assertThat(parsed[2], is("ccc"));
   }
-  
+
   @Test
   public void testSimpleDateFormatting() {
     SeparatedString sepString = new SeparatedString().separatedBy(", ");
@@ -379,7 +380,8 @@ public class SeparatedStringTest {
             .withThisAfterEachTerm("8")
             .withEscapeChar("\\");
 // 1000,117090058,117970084,"170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze",Flensburg-Weiche - Flensb. Gr
-    sepString.addAll("10\\00", "117090058", "117970084", "170,9 + 58", "179,7 + 84", "Flensburg Weiche, W 203 - Flensburg Grenze", "Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
+    String[] values = {"10\\00", "117090058", "117970084", "170,9 + 58", "179,7 + 84", "Flensburg Weiche, W 203 - Flensburg Grenze", "Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg"};
+    sepString.addAll(values);//("10\\00", "117090058", "117970084", "170,9 + 58", "179,7 + 84", "Flensburg Weiche, W 203 - Flensburg Grenze", "Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
     final String encoded = sepString.toString();
     assertThat(encoded, is("1\\10\\\\008, 1\\1\\1709005\\88, 1\\1\\179700\\848, 1\\170,9 + 5\\88, 1\\179,7 + \\848, 1Flensburg Weiche\\, W 203 - Flensburg Grenze8, 1Flensburg-Weiche - Flensb. Gr8, 1Albert \"The Pain\" Hallsburg8"));
 
@@ -398,15 +400,13 @@ public class SeparatedStringTest {
     assertThat(nestedArray[2], is("sixsixsix"));
 
     String[] parsed = sepString.parseToArray(nestedArray[1]);
-    assertThat(parsed.length, is(8));
-    assertThat(parsed[0], is("10\\00"));
-    assertThat(parsed[1], is("117090058"));
-    assertThat(parsed[2], is("117970084"));
-    assertThat(parsed[3], is("170,9 + 58"));
-    assertThat(parsed[4], is("179,7 + 84"));
-    assertThat(parsed[5], is("Flensburg Weiche, W 203 - Flensburg Grenze"));
-    assertThat(parsed[6], is("Flensburg-Weiche - Flensb. Gr"));
-    assertThat(parsed[7], is("Albert \"The Pain\" Hallsburg"));
+    assertThat(parsed.length, is(values.length));
+    Looper looper = Looper.loopUntilLimit(parsed.length);
+    looper.loop(
+            (in) -> {
+              System.out.println((in.index())+" |parsed: "+parsed[in.index()]+" || "+values[in.index()]+" : values");
+              assertThat(parsed[in.index()], is(values[in.index()]));
+            });
   }
 
   @Test
@@ -474,7 +474,19 @@ public class SeparatedStringTest {
 
   @Test
   public void testMapParsing() {
-    Map<String, String> parsed = SeparatedStringBuilder
+    final SeparatedString encoder = SeparatedStringBuilder.byCommas().withKeyValueSeparator("=");
+    String encoded = encoder
+            .add("left", "10px")
+            .add("right", "20em")
+            .add("border", 3)
+            .encode();
+    Map<String, String> parsed = encoder.parseToMap(encoded);
+    assertThat(parsed.size(), is(3));
+    assertThat(parsed.get("left"), is("10px"));
+    assertThat(parsed.get("right"), is("20em"));
+    assertThat(parsed.get("border"), is("3"));
+    
+    parsed = SeparatedStringBuilder
             .byCommasWithQuotedTermsAndBackslashEscape()
             .parseToMap("left=10px,right=20em,border=3");
     assertThat(parsed.size(), is(3));
@@ -490,6 +502,64 @@ public class SeparatedStringTest {
     assertThat(parsed.get("left"), is("10px"));
     assertThat(parsed.get("right"), is("20em"));
     assertThat(parsed.get("border"), is("3"));
+  }
+
+  @Test
+  public void testloopControl() {
+    // Test unaltered loops
+    SeparatedString encoder = SeparatedStringBuilder.byCommas();
+    String encoded = encoder
+            .add("left")
+            .add("right")
+            .add("border")
+            .encode();
+    assertThat(encoded, is("left,right,border"));
+    encoder = SeparatedStringBuilder.byCommas();
+    encoded = encoder
+            .add("left")
+            .add("right")
+            .add("border")
+            .add("left")
+            .encode();
+    assertThat(encoded, is("left,right,border,left"));
+    
+    //Test closed loops 
+    // closed loops are not altered
+    encoder = SeparatedStringBuilder.byCommas().withClosedLoop();
+    encoded = encoder
+            .add("left")
+            .add("right")
+            .add("border")
+            .add("left")
+            .encode();
+    assertThat(encoded, is("left,right,border,left"));
+    // unclosed loops are altered
+    encoder = SeparatedStringBuilder.byCommas().withClosedLoop();
+    encoded = encoder
+            .add("left")
+            .add("right")
+            .add("border")
+            .encode();
+    assertThat(encoded, is("left,right,border,left"));
+
+    //Test open loops
+    // closed loops are altered
+    encoder = SeparatedStringBuilder.byCommas().withOpenLoop();
+    encoded = encoder
+            .add("left")
+            .add("right")
+            .add("border")
+            .add("left")
+            .encode();
+    assertThat(encoded, is("left,right,border"));
+    // open loops are unaltered
+    encoder = SeparatedStringBuilder.byCommas().withOpenLoop();
+    encoded = encoder
+            .add("left")
+            .add("right")
+            .add("border")
+            .encode();
+    assertThat(encoded, is("left,right,border"));
   }
 
 }

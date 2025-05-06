@@ -72,12 +72,24 @@ public class SeparatedString {
   private String escapeChar = "";
   private String useWhenEmpty = "";
   private String keyValueSeparator = "";
-  private boolean closedLoop = false;
+  private ClosedLoop closedLoop = ClosedLoop.Unaltered;
   private boolean trimBlanks = false;
   private boolean retainNulls = false;
   private String retainNullString = "null";
   private boolean uniqueValuesOnly = false;
   private String lineEnd = "";
+
+  public enum ClosedLoop {
+    Closed, Open, Unaltered;
+
+    private static boolean isClosed(ClosedLoop closedLoop) {
+      return Closed.equals(closedLoop);
+    }
+
+    private static boolean isOpen(ClosedLoop closedLoop) {
+      return Open.equals(closedLoop);
+    }
+  }
 
   SeparatedString() {
   }
@@ -213,10 +225,28 @@ public class SeparatedString {
   }
 
   /**
-   * Encodes the provided Strings as per the setup of the SeparatedString.
+   * Encodes the provided Objects as per the setup of the SeparatedString.
    *
    * <p>
-   * for instance a {@code SeparatedString.commaSeparated().encode("1","2","3")} will return "1,2,3".</p>
+   * for instance a {@code SeparatedString.commaSeparated().encode("1", 2, "3")} will return "1,2,3".</p>
+   *
+   * <p>
+   * No values are added to this SeparatedString and no values within this SeparatedString are useds in the encoding</p>
+   *
+   * @param strs the Strings to be encoded as separated string
+   * @return returns the SeparatedString's contents encoded as a String
+   */
+  public String encode(Objects... strs) {
+    SeparatedString newVersion = duplicateSettingsOf(this);
+    String encode = newVersion.addAll((Object[]) strs).encode();
+    return encode;
+  }
+
+  /**
+   * Encodes the provided Objects as per the setup of the SeparatedString.
+   *
+   * <p>
+   * for instance a {@code SeparatedString.commaSeparated().encode("1",2,"3")} will return "1,2,3".</p>
    *
    * <p>
    * No values are added to this SeparatedString and no values within this SeparatedString are used in the encoding</p>
@@ -224,7 +254,7 @@ public class SeparatedString {
    * @param strs the Strings to be encoded as separated string
    * @return returns the SeparatedString's contents encoded as a String
    */
-  public String encode(List<String> strs) {
+  public String encode(List<?> strs) {
     SeparatedString newVersion = duplicateSettingsOf(this);
     String encode = newVersion.addAll(strs).encode();
     return encode;
@@ -234,7 +264,7 @@ public class SeparatedString {
    * Encodes the contents as per the setup of the SeparatedString.
    *
    * <p>
-   * for instance a {@code SeparatedString.commaSeparated().addAll("1","2","3")} will return "1,2,3".</p>
+   * for instance a {@code SeparatedString.commaSeparated().addAll("1",2,"3").toString()} will return "1,2,3".</p>
    *
    * @return returns the SeparatedString's contents encoded as a String
    */
@@ -272,10 +302,15 @@ public class SeparatedString {
           }
         }
       }
-      if (this.closedLoop && firstEntry != null && !firstEntry.equals(currentEntry)) {
+      if (ClosedLoop.isClosed(this.closedLoop) && firstEntry != null && !firstEntry.equals(currentEntry)) {
         strs.append(sep).append(firstEntry);
       }
-      return getPrefix() + strs.toString() + getSuffix();
+      
+      String infix = strs.toString();
+      if (ClosedLoop.isOpen(this.closedLoop) && firstEntry != null && firstEntry.equals(currentEntry)) {
+        infix = infix.replaceAll(sep + currentEntry + "$", "");
+      }
+      return getPrefix() + infix + getSuffix();
     }
   }
 
@@ -287,12 +322,6 @@ public class SeparatedString {
     }
     Object object = element.getValue();
     String string = format(object);
-//    if (string == null && !getRetainNulls()) {
-//      string = getEmptyValue();
-//    }
-//    if (string != null && string.isEmpty()) {
-//      string = getEmptyValue();
-//    }
     build.append(replaceSequencesInString(string, getReplacementSequences()));
 
     return build.toString();
@@ -316,9 +345,9 @@ public class SeparatedString {
 
   private <T> String format(T object) {
     if (object == null) {
-      // there is no object so just report it
+      // there is no object so just report it as empty or null
       if (retainNulls) {
-        // null need to be reported as nulls
+        // null needs to be reported as null
         return retainNullString;
       } else {
         // the default is to report it as empty
@@ -334,17 +363,18 @@ public class SeparatedString {
     // no formatter so return the default encoding
     return object.toString();
   }
-  
+
   /**
    * Sets the SeparatedString to retain values and report them using the specified value.
-   * 
-   * <p>for instance to have nulls appears as [NULL] call <code>sepStr.withNullsAs("[NULL]");</code></p>
+   *
+   * <p>
+   * for instance to have nulls appears as [NULL] call <code>sepStr.withNullsAs("[NULL]");</code></p>
    *
    * @param useInsteadOfNull the value used to indicate a null value
    * @return this SeparatedString
    */
-  public SeparatedString withNullsAs(String useInsteadOfNull){
-    retainNulls=true;
+  public SeparatedString withNullsAs(String useInsteadOfNull) {
+    retainNulls = true;
     retainNullString = useInsteadOfNull;
     return this;
   }
@@ -426,7 +456,7 @@ public class SeparatedString {
    * @param c a collection of objects
    * @return this SeparatedString
    */
-  public SeparatedString addAll(int index, Collection<String> c) {
+  public SeparatedString addAll(int index, Collection<?> c) {
     if (c != null) {
       final List<StringEntry> entries
               = c.stream()
@@ -443,7 +473,7 @@ public class SeparatedString {
    * @param c a collection of objects
    * @return this SeparatedString
    */
-  public SeparatedString addAll(Collection<String> c) {
+  public SeparatedString addAll(Collection<?> c) {
     if (c != null && !c.isEmpty()) {
       final List<StringEntry> entries
               = c.stream()
@@ -467,12 +497,24 @@ public class SeparatedString {
   }
 
   /**
+   * Adds the key and value to the values within this SeparatedString.
+   *
+   * @param key the label for the value
+   * @param value the value to be stored
+   * @return this SeparatedString
+   */
+  public SeparatedString add(String key, Object value) {
+    strings.add(StringEntry.of(key, value));
+    return this;
+  }
+
+  /**
    * Adds all values in the collection to the values within this SeparatedString.
    *
    * @param c a collection of objects
    * @return this SeparatedString
    */
-  public SeparatedString addAll(Map<String, String> c) {
+  public SeparatedString addAll(Map<String, Object> c) {
     if (c != null && !c.isEmpty()) {
       c.forEach((key, value) -> {
         strings.add(StringEntry.of(key, value));
@@ -488,7 +530,7 @@ public class SeparatedString {
    * @param keyValueSeparator the key/value separator to use during processing (overrides any previous key/value separator)
    * @return this SeparatedString
    */
-  public SeparatedString addAll(Map<String, String> c, String keyValueSeparator) {
+  public SeparatedString addAll(Map<String, Object> c, String keyValueSeparator) {
     withKeyValueSeparator(keyValueSeparator);
     addAll(c);
     return this;
@@ -501,6 +543,16 @@ public class SeparatedString {
    * @return this SeparatedString
    */
   public SeparatedString addLine(String... strs) {
+    return addLine((Object[]) strs);
+  }
+
+  /**
+   * Adds all values to the values within this SeparatedString.
+   *
+   * @param strs several strings to be added as values
+   * @return this SeparatedString
+   */
+  public SeparatedString addLine(Object... strs) {
     this.addAll(strs);
     this.addLine();
     return this;
@@ -533,7 +585,7 @@ public class SeparatedString {
    * @return this SeparatedString
    */
   public SeparatedString addAll(String... strs) {
-    return addAll((Object[])strs);
+    return addAll((Object[]) strs);
   }
 
   /**
@@ -612,6 +664,20 @@ public class SeparatedString {
   }
 
   /**
+   * Inserts the specified element at the specified position in this list.Shifts the element currently at that position (if any) and any subsequent elements to
+   * the right (adds one to their indices).
+   *
+   * @param index index at which the specified element is to be inserted
+   * @param element element to be inserted
+   * @return this
+   * @throws IndexOutOfBoundsException {@inheritDoc}
+   */
+  public SeparatedString add(int index, Object element) {
+    strings.add(index, StringEntry.of(element));
+    return this;
+  }
+
+  /**
    * Inserts the specified element into the list of known values.
    *
    * @param string element to be inserted
@@ -647,6 +713,17 @@ public class SeparatedString {
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
   public SeparatedString containing(String... strings) {
+    return addAll(strings);
+  }
+
+  /**
+   * Inserts the specified elements into the list of known values.
+   *
+   * @param strings elements to be inserted
+   * @return this
+   * @throws IndexOutOfBoundsException {@inheritDoc}
+   */
+  public SeparatedString containing(Object... strings) {
     return addAll(strings);
   }
 
@@ -725,11 +802,13 @@ public class SeparatedString {
    *
    * <p>
    * While closed loops are unusual for most applications, this is useful when defining polygons in some GIS systems.</p>
+   * 
+   * <p>Note: that for the list 1,2,3 this option will produce 1,2,3,1 as the trailing 1 is "closing the loop".</p>
    *
    * @return this SeparatedString
    */
   public SeparatedString withClosedLoop() {
-    this.closedLoop = true;
+    this.closedLoop = ClosedLoop.Closed;
     return this;
   }
 
@@ -737,12 +816,14 @@ public class SeparatedString {
    * Instructs the SeparatedString to NOT repeat the first element at the end.
    *
    * <p>
-   * While closed loops are unusual for most applications, this is useful when defining polygons in some GIS systems.</p>
+   * While open loops are unusual for most applications, this is useful when defining polygons in some GIS systems.</p>
+   * 
+   * <p>Note: that for the list 1,2,3,4,5,1 this option will produce 1,2,3,4,5 as the trailing 1 is "closing the loop".</p>
    *
    * @return this SeparatedString
    */
-  public SeparatedString withoutClosedLoop() {
-    this.closedLoop = false;
+  public SeparatedString withOpenLoop() {
+    this.closedLoop = ClosedLoop.Open;
     return this;
   }
 
