@@ -51,7 +51,11 @@ public class SeparatedStringBuilderTest {
   }
 
   @Test
-  public void testSimpleParsing() {
-	assertThat(true, is(true));
+  public void testHTMLOrderedList() {
+		SeparatedString sep = SeparatedStringBuilder.htmlOrderList();
+		sep.add(1);
+		sep.addAll(2,3,"More");
+		String encoded = sep.encode();
+		assertThat(true, is(true));
 }
 }
