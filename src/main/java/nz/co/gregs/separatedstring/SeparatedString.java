@@ -78,6 +78,7 @@ public class SeparatedString {
   private String retainNullString = "null";
   private boolean uniqueValuesOnly = false;
   private String lineEnd = "";
+  private String lineStart = "";
 
   public enum ClosedLoop {
     Closed, Open, Unaltered;
@@ -136,7 +137,7 @@ public class SeparatedString {
    * @return this SeparatedString with the separator set
    */
   public SeparatedString separatedBy(String separator) {
-    if (separator != null && !separator.isEmpty()) {
+    if (separator != null) {
       this.separator = separator;
     }
     return this;
@@ -287,6 +288,9 @@ public class SeparatedString {
           if (entry.isEndOfLineMarker()) {
             strs.append(getLineEnd());
             sep = "";
+          } else if (entry.isStartOfLineMarker()) {
+            strs.append(getLineStart());
+            sep = "";
           } else {
             if (uniqueValuesOnly && previousElements.contains(entryString)) {
               break;
@@ -305,7 +309,7 @@ public class SeparatedString {
       if (ClosedLoop.isClosed(this.closedLoop) && firstEntry != null && !firstEntry.equals(currentEntry)) {
         strs.append(sep).append(firstEntry);
       }
-      
+
       String infix = strs.toString();
       if (ClosedLoop.isOpen(this.closedLoop) && firstEntry != null && firstEntry.equals(currentEntry)) {
         infix = infix.replaceAll(sep + currentEntry + "$", "");
@@ -346,9 +350,9 @@ public class SeparatedString {
   private <T> String format(T object) {
     if (object == null) {
       // there is no object so just report it as empty or null
-      if (retainNulls) {
+      if (getRetainNulls()) {
         // null needs to be reported as null
-        return retainNullString;
+        return getNullRepresentation();
       } else {
         // the default is to report it as empty
         return this.getEmptyValue();
@@ -547,14 +551,19 @@ public class SeparatedString {
   }
 
   /**
-   * Adds all values to the values within this SeparatedString.
+   * Adds all values as a line within this SeparatedString.
+   *
+   * <p>
+   * When multi-line data is being used use add line to insert the values as a whole line.</p>
    *
    * @param strs several strings to be added as values
    * @return this SeparatedString
    */
   public SeparatedString addLine(Object... strs) {
+    strings.add(StringEntry.getStartOfLineMarker());
     this.addAll(strs);
-    this.addLine();
+    strings.add(StringEntry.getEndOfLineMarker());
+    checkLineEndIsSet();
     return this;
   }
 
@@ -571,11 +580,16 @@ public class SeparatedString {
    * @return this SeparatedString
    */
   public SeparatedString addLine() {
+    strings.add(StringEntry.getStartOfLineMarker());
+    strings.add(StringEntry.getEndOfLineMarker());
+    checkLineEndIsSet();
+    return this;
+  }
+
+  private void checkLineEndIsSet() {
     if (lineEnd.isEmpty()) {
       this.lineEnd = System.lineSeparator();
     }
-    strings.add(StringEntry.getEndOfLineMarker());
-    return this;
   }
 
   /**
@@ -802,8 +816,9 @@ public class SeparatedString {
    *
    * <p>
    * While closed loops are unusual for most applications, this is useful when defining polygons in some GIS systems.</p>
-   * 
-   * <p>Note: that for the list 1,2,3 this option will produce 1,2,3,1 as the trailing 1 is "closing the loop".</p>
+   *
+   * <p>
+   * Note: that for the list 1,2,3 this option will produce 1,2,3,1 as the trailing 1 is "closing the loop".</p>
    *
    * @return this SeparatedString
    */
@@ -817,8 +832,9 @@ public class SeparatedString {
    *
    * <p>
    * While open loops are unusual for most applications, this is useful when defining polygons in some GIS systems.</p>
-   * 
-   * <p>Note: that for the list 1,2,3,4,5,1 this option will produce 1,2,3,4,5 as the trailing 1 is "closing the loop".</p>
+   *
+   * <p>
+   * Note: that for the list 1,2,3,4,5,1 this option will produce 1,2,3,4,5 as the trailing 1 is "closing the loop".</p>
    *
    * @return this SeparatedString
    */
@@ -1056,6 +1072,10 @@ public class SeparatedString {
         isInEscape = true;
         // move past the escape sequence but remember we'll increment at the end of the loop
         i = i + escapeSeq.length() - 1;
+      } else if (!isInEscape && !isInQuotes && !isInValue && getLineStart().length() > 0 && str.startsWith(getLineStart())) {
+        // OK, we checked everything and it still looks like the beginning of a line so jump forward
+        // move past the LineStart sequence but remember we'll increment at the end of the loop
+        i = i + getLineStart().length() - 1;
       } else if (hasQuoting && str.startsWith(quoteStart)) {
         if (quotesAreEqual) {
           // turn the quotes on and off as required
@@ -1072,9 +1092,15 @@ public class SeparatedString {
         } else if (isInQuotes) {
           isInQuotes = false;
         }
+        if (separatorString.length() == 0) {
+          // When there is no separator we need to add the value to the list
+          checkUniquenessRequirementsAndAdd(results.values, format(val), previousElements, currentLine);
+          // and clear the val
+          val = new StringBuilder();
+        }
         // move past the escape sequence but remember we'll increment at the end of the loop
         i = i + quoteEnd.length() - 1;
-      } else if (str.startsWith(separatorString)) {
+      } else if (separatorString.length() > 0 && str.startsWith(separatorString)) {
         // Comma MIGHT be the end of a value but we need to check first
         if (isInQuotes) {
           // Inside a quoted string, a comma is just another char
@@ -1090,7 +1116,7 @@ public class SeparatedString {
           // edge case: we're not in a value but we found a comma so its an empty value
           checkUniquenessRequirementsAndAdd(results.values, "", previousElements, currentLine);
         }
-        // Move past the separator
+        // Move past the separator but remember we'll increment at the end of the loop
         i = i + separatorString.length() - 1;
       } else if (!lineEndString.isEmpty() && str.startsWith(lineEndString)) {
         // we have found a new line
@@ -1103,7 +1129,7 @@ public class SeparatedString {
         results.lines.add(currentLine);
         // and make a new blank currentLine
         currentLine = new ArrayList<>(0);
-        // Move past the newline
+        // Move past the newline but remember we'll increment at the end of the loop
         i = i + lineEndString.length() - 1;
       } else if (chr == ' ') {
         // leading spaces are, generally, not part of the value
@@ -1311,8 +1337,21 @@ public class SeparatedString {
     return lineEnd;
   }
 
+  private String getLineStart() {
+    return lineStart;
+  }
+
+  public SeparatedString withLineStartSequence(String lineStartSequence) {
+    lineStart = lineStartSequence;
+    return this;
+  }
+
   public SeparatedString withLineEndSequence(String lineEndSequence) {
     this.lineEnd = lineEndSequence;
     return this;
+  }
+
+  public String getNullRepresentation() {
+    return retainNullString;
   }
 }

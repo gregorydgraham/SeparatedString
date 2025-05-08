@@ -12,6 +12,7 @@ package nz.co.gregs.separatedstring.util;
 public class StringEntry {
 
   private static StringEntry END_OF_LINE_MARKER = new StringEntry();
+  private static StringEntry START_OF_LINE_MARKER = new StringEntry();
 
   private boolean hasKey = false;
   private String key;
@@ -50,6 +51,10 @@ public class StringEntry {
     return END_OF_LINE_MARKER;
   }
 
+  public static StringEntry getStartOfLineMarker() {
+    return START_OF_LINE_MARKER;
+  }
+
   /**
    * @return the hasKey
    */
@@ -73,6 +78,10 @@ public class StringEntry {
 
   public boolean isEndOfLineMarker() {
     return StringEntry.END_OF_LINE_MARKER.equals(this);
+  }
+
+  public boolean isStartOfLineMarker() {
+    return StringEntry.START_OF_LINE_MARKER.equals(this);
   }
 
 }

@@ -105,7 +105,7 @@ public class SeparatedStringBuilder {
 	 * @return a SeparatedString
 	 */
 	public static SeparatedString htmlOrderedList() {
-		return SeparatedStringBuilder.forSeparator("\n").withThisBeforeEachTerm("<li>").withThisAfterEachTerm("</li>").withPrefix("<ol>").withSuffix("</ol>\n");
+		return SeparatedStringBuilder.forSeparator("\n").withThisBeforeEachTerm("<li>").withThisAfterEachTerm("</li>").withPrefix("<ol>\n").withSuffix("\n</ol>\n");
 	}
 
 	/**
@@ -115,8 +115,18 @@ public class SeparatedStringBuilder {
 	 * @return a SeparatedString
 	 */
 	public static SeparatedString htmlUnorderedList() {
-		return SeparatedStringBuilder.forSeparator("\n").withThisBeforeEachTerm("<li>").withThisAfterEachTerm("</li>").withPrefix("<ul>").withSuffix("</ul>\n");
+		return SeparatedStringBuilder.forSeparator("\n").withThisBeforeEachTerm("<li>").withThisAfterEachTerm("</li>").withPrefix("<ul>\n").withSuffix("\n</ul>\n");
 	}
+
+  public static SeparatedString htmlTable() {
+    return SeparatedStringBuilder
+            .forSeparator("")
+            .withLineEndSequence("</tr>\n<tr>")
+            .withThisBeforeEachTerm("<td>")
+            .withThisAfterEachTerm("</td>")
+            .withPrefix("<table>\n<tr>")
+            .withSuffix("</tr>\n</table>\n");
+  }
 
 	/**
 	 * Creates a new SeparatedString that starts with provided value.

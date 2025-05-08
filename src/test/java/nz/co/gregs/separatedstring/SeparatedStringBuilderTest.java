@@ -30,13 +30,6 @@
  */
 package nz.co.gregs.separatedstring;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import nz.co.gregs.looper.Looper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import org.junit.Test;
@@ -52,10 +45,34 @@ public class SeparatedStringBuilderTest {
 
   @Test
   public void testHTMLOrderedList() {
-		SeparatedString sep = SeparatedStringBuilder.htmlOrderList();
-		sep.add(1);
-		sep.addAll(2,3,"More");
-		String encoded = sep.encode();
-		assertThat(true, is(true));
-}
+    SeparatedString sep = SeparatedStringBuilder.htmlOrderedList();
+    sep.add(1);
+    sep.addAll(2, 3, "More");
+    String encoded = sep.encode();
+    System.out.println(encoded);
+    System.out.println("<ol>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ol>\n");
+    assertThat(encoded, is("<ol>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ol>\n"));
+  }
+
+  @Test
+  public void testHTMLUnorderedList() {
+    SeparatedString sep = SeparatedStringBuilder.htmlUnorderedList();
+    sep.add(1);
+    sep.addAll(2, 3, "More");
+    String encoded = sep.encode();
+    System.out.println(encoded);
+    System.out.println("<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ul>\n");
+    assertThat(encoded, is("<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ul>\n"));
+  }
+
+  @Test
+  public void testHTMLTable() {
+    SeparatedString sep = SeparatedStringBuilder.htmlTable();
+    sep.addLine(1,2,3,4);
+    sep.addAll(2, 3,4, "More");
+    String encoded = sep.encode();
+    System.out.println(encoded);
+    System.out.println("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n<tr><td>2</td><td>3</td><td>4</td><td>More</td></tr>\n</table>\n");
+    assertThat(encoded, is("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n<tr><td>2</td><td>3</td><td>4</td><td>More</td></tr>\n</table>\n"));
+  }
 }
