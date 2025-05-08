@@ -118,16 +118,6 @@ public class SeparatedStringBuilder {
 		return SeparatedStringBuilder.forSeparator("\n").withThisBeforeEachTerm("<li>").withThisAfterEachTerm("</li>").withPrefix("<ul>\n").withSuffix("\n</ul>\n");
 	}
 
-  public static SeparatedString htmlTable() {
-    return SeparatedStringBuilder
-            .forSeparator("")
-            .withLineEndSequence("</tr>\n<tr>")
-            .withThisBeforeEachTerm("<td>")
-            .withThisAfterEachTerm("</td>")
-            .withPrefix("<table>\n<tr>")
-            .withSuffix("</tr>\n</table>\n");
-  }
-
 	/**
 	 * Creates a new SeparatedString that starts with provided value.
 	 *
