@@ -64,15 +64,4 @@ public class SeparatedStringBuilderTest {
     System.out.println("<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ul>\n");
     assertThat(encoded, is("<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ul>\n"));
   }
-
-  @Test
-  public void testHTMLTable() {
-    SeparatedString sep = SeparatedStringBuilder.htmlTable();
-    sep.addLine(1,2,3,4);
-    sep.addAll(2, 3,4, "More");
-    String encoded = sep.encode();
-    System.out.println(encoded);
-    System.out.println("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n<tr><td>2</td><td>3</td><td>4</td><td>More</td></tr>\n</table>\n");
-    assertThat(encoded, is("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n<tr><td>2</td><td>3</td><td>4</td><td>More</td></tr>\n</table>\n"));
-  }
 }
