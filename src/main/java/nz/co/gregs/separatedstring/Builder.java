@@ -34,7 +34,7 @@ import java.util.function.Function;
 
 /**
  *
- * @author gregorygraham
+ * @author Gregory Graham
  */
 public class Builder {
 
@@ -346,6 +346,10 @@ public class Builder {
    */
   public static Builder lineSeparated() {
     return byLines();
+  }
+
+  protected SeparatedString getSeparatedString() {
+    return separatedString;
   }
 
 }
