@@ -33,7 +33,6 @@ package nz.co.gregs.separatedstring;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -47,9 +46,13 @@ public class Encoder {
   protected Encoder(SeparatedString sep) {
     separatedString = sep;
   }
-  
-  public Builder builder(){
+
+  public Builder builder() {
     return new Builder(separatedString);
+  }
+
+  public Decoder decoder() {
+    return new Decoder(separatedString);
   }
 
   public String encode() {
@@ -60,11 +63,7 @@ public class Encoder {
     return separatedString.encode(strs);
   }
 
-  public String encode(Objects... strs) {
-    return separatedString.encode(strs);
-  }
-
-  public String encode(List<?> strs) {
+  public String encode(List<Object> strs) {
     return separatedString.encode(strs);
   }
 
@@ -73,7 +72,7 @@ public class Encoder {
     return this;
   }
 
-  public Encoder addAll(Collection<?> c) {
+  public Encoder addAll(List<Object> c) {
     separatedString.addAll(c);
     return this;
   }
@@ -93,17 +92,7 @@ public class Encoder {
     return this;
   }
 
-  public Encoder addAll(Map<String, Object> c, String keyValueSeparator) {
-    separatedString.addAll(c, keyValueSeparator);
-    return this;
-  }
-
   public Encoder addLine(String... strs) {
-    separatedString.addLine(strs);
-    return this;
-  }
-
-  public Encoder addLine(Object... strs) {
     separatedString.addLine(strs);
     return this;
   }
@@ -114,11 +103,6 @@ public class Encoder {
   }
 
   public Encoder addAll(String... strs) {
-    separatedString.addAll(strs);
-    return this;
-  }
-
-  public Encoder addAll(Object... strs) {
     separatedString.addAll(strs);
     return this;
   }
@@ -153,14 +137,33 @@ public class Encoder {
     return this;
   }
 
-  public Encoder containing(String... strings) {
+  public Encoder containing(Object... strings) {
     separatedString.containing(strings);
     return this;
   }
 
-  public Encoder containing(Object... strings) {
-    separatedString.containing(strings);
-    return this;
+  public boolean isNotEmpty() {
+    return separatedString.isNotEmpty();
+  }
+
+  public boolean isEmpty() {
+    return separatedString.isEmpty();
+  }
+
+  public SeparatedString removeAll(String... c) {
+    return separatedString.removeAll(c);
+  }
+
+  public SeparatedString removeAll(List<Object> baddies) {
+    return separatedString.removeAll(baddies);
+  }
+
+  public SeparatedString removeAll(Map<String, Object> c) {
+    return separatedString.removeAll(c);
+  }
+
+  public SeparatedString remove(int index) {
+    return separatedString.remove(index);
   }
 
 }

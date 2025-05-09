@@ -95,6 +95,10 @@ public class SeparatedString {
   SeparatedString() {
   }
 
+  protected static SeparatedString copy(SeparatedString old) {
+    return duplicateSettingsOf(old);
+  }
+
   /**
    * Returns whether or not leading and trailing blanks will be trimmed.
    *
@@ -237,12 +241,11 @@ public class SeparatedString {
    * @param strs the Strings to be encoded as separated string
    * @return returns the SeparatedString's contents encoded as a String
    */
-  public String encode(Objects... strs) {
-    SeparatedString newVersion = duplicateSettingsOf(this);
-    String encode = newVersion.addAll((Object[]) strs).encode();
-    return encode;
-  }
-
+//  public String encode(String... strs) {
+//    SeparatedString newVersion = duplicateSettingsOf(this);
+//    String encode = newVersion.addAll(strs).encode();
+//    return encode;
+//  }
   /**
    * Encodes the provided Objects as per the setup of the SeparatedString.
    *
@@ -255,7 +258,7 @@ public class SeparatedString {
    * @param strs the Strings to be encoded as separated string
    * @return returns the SeparatedString's contents encoded as a String
    */
-  public String encode(List<?> strs) {
+  public String encode(List<Object> strs) {
     SeparatedString newVersion = duplicateSettingsOf(this);
     String encode = newVersion.addAll(strs).encode();
     return encode;
@@ -292,7 +295,7 @@ public class SeparatedString {
             strs.append(getLineStart());
             sep = "";
           } else {
-            if (uniqueValuesOnly && previousElements.contains(entryString)) {
+            if (isUniqueValuesOnly() && previousElements.contains(entryString)) {
               break;
             } else {
               previousElements.add(entryString);
@@ -359,13 +362,17 @@ public class SeparatedString {
       }
     }
     // look for a formatter
-    Function<T, String> formatter = (Function<T, String>) formatters.get(object.getClass());
+    Function<T, String> formatter = getFormatterFor(object);
     if (formatter != null) {
       // apply the formatter and return the result
       return formatter.apply(object);
     }
     // no formatter so return the default encoding
     return object.toString();
+  }
+
+  protected <T> Function<T, String> getFormatterFor(T object) {
+    return (Function<T, String>) formatters.get(object.getClass());
   }
 
   /**
@@ -448,8 +455,35 @@ public class SeparatedString {
    * @param c a collection of objects
    * @return this SeparatedString
    */
-  public SeparatedString removeAll(Collection<?> c) {
-    strings.removeAll(c);
+  public SeparatedString removeAll(String... c) {
+    return removeAll(List.of((Object[]) c));
+  }
+
+  /**
+   * Removes all values in the collection from the values within this SeparatedString.
+   *
+   * @param baddies a collection of objects
+   * @return this SeparatedString
+   */
+  public SeparatedString removeAll(List<Object> baddies) {
+    final StringEntry[] iterator = strings.toArray(new StringEntry[]{});
+    for (int i = 0; i < iterator.length; i++) {
+      StringEntry next = iterator[i];
+      if (baddies.contains(next.getKey())){
+        strings.remove(next);
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Removes all values in the collection from the values within this SeparatedString.
+   *
+   * @param c a collection of objects
+   * @return this SeparatedString
+   */
+  public SeparatedString removeAll(Map<String, Object> c) {
+    removeAll(List.of(c.keySet().toArray()));
     return this;
   }
 
@@ -477,7 +511,7 @@ public class SeparatedString {
    * @param c a collection of objects
    * @return this SeparatedString
    */
-  public SeparatedString addAll(Collection<?> c) {
+  public SeparatedString addAll(List<Object> c) {
     if (c != null && !c.isEmpty()) {
       final List<StringEntry> entries
               = c.stream()
@@ -561,7 +595,9 @@ public class SeparatedString {
    */
   public SeparatedString addLine(Object... strs) {
     strings.add(StringEntry.getStartOfLineMarker());
-    this.addAll(strs);
+    for (Object str : strs) {
+      strings.add(new StringEntry(str));
+    }
     strings.add(StringEntry.getEndOfLineMarker());
     checkLineEndIsSet();
     return this;
@@ -599,7 +635,11 @@ public class SeparatedString {
    * @return this SeparatedString
    */
   public SeparatedString addAll(String... strs) {
-    return addAll((Object[]) strs);
+    for (String str : strs) {
+      strings.add(new StringEntry(str));
+    }
+    return this;
+//    return addAll((Object[]) strs);
   }
 
   /**
@@ -608,18 +648,17 @@ public class SeparatedString {
    * @param strs several objects to be added as values
    * @return this SeparatedString
    */
-  public SeparatedString addAll(Object... strs) {
-    final List<StringEntry> asList
-            = Arrays.asList(strs)
-                    .stream()
-                    .map((t) -> new StringEntry(t))
-                    .collect(Collectors.toList());
-    if (asList != null) {
-      strings.addAll(asList);
-    }
-    return this;
-  }
-
+//  public <T> SeparatedString addAll(T... strs) {
+//    final List<StringEntry> asList
+//            = Arrays.asList(strs)
+//                    .stream()
+//                    .map((t) -> new StringEntry(t))
+//                    .collect(Collectors.toList());
+//    if (asList != null) {
+//      strings.addAll(asList);
+//    }
+//    return this;
+//  }
   /**
    * Adds all values to the values within this SeparatedString.
    *
@@ -738,7 +777,10 @@ public class SeparatedString {
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
   public SeparatedString containing(Object... strings) {
-    return addAll(strings);
+    for (Object string : strings) {
+      this.strings.add(new StringEntry(string));
+    }
+    return this;
   }
 
   /**
@@ -1161,7 +1203,7 @@ public class SeparatedString {
   }
 
   private void checkUniquenessRequirementsAndAdd(List<String> list, String candidate, Set<String> previousEntries, List<String> currentLine) {
-    if (uniqueValuesOnly) {
+    if (isUniqueValuesOnly()) {
       if (!previousEntries.contains(candidate)) {
         list.add(candidate);
         currentLine.add(candidate);
@@ -1189,8 +1231,8 @@ public class SeparatedString {
    * @param input the string to be decoded
    * @return the values found
    */
-  public Map<String, String> parseToMap(String input) {
-    Map<String, String> map = new HashMap<>(0);
+  public Map<String, Object> parseToMap(String input) {
+    Map<String, Object> map = new HashMap<>(0);
     if (input == null || input.isEmpty()) {
       return map;
     }
@@ -1316,7 +1358,7 @@ public class SeparatedString {
     return retainNulls;
   }
 
-  private SeparatedString duplicateSettingsOf(SeparatedString sepString) {
+  private static SeparatedString duplicateSettingsOf(SeparatedString sepString) {
     SeparatedString newVersion = new SeparatedString();
     newVersion.separator = sepString.separator;
     newVersion.prefix = sepString.prefix;
@@ -1329,7 +1371,7 @@ public class SeparatedString {
     newVersion.closedLoop = sepString.closedLoop;
     newVersion.trimBlanks = sepString.trimBlanks;
     newVersion.retainNulls = sepString.retainNulls;
-    newVersion.uniqueValuesOnly = sepString.uniqueValuesOnly;
+    newVersion.uniqueValuesOnly = sepString.isUniqueValuesOnly();
     return newVersion;
   }
 
@@ -1353,5 +1395,12 @@ public class SeparatedString {
 
   public String getNullRepresentation() {
     return retainNullString;
+  }
+
+  /**
+   * @return the uniqueValuesOnly
+   */
+  protected boolean isUniqueValuesOnly() {
+    return uniqueValuesOnly;
   }
 }

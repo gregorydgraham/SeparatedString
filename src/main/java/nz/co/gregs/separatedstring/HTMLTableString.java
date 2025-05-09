@@ -32,6 +32,7 @@ package nz.co.gregs.separatedstring;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -84,7 +85,15 @@ public class HTMLTableString {
     return htmlTableFormatter.isEmpty();
   }
 
-  public SeparatedString removeAll(Collection<?> c) {
+  public SeparatedString removeAll(String... c) {
+    return htmlTableFormatter.removeAll(c);
+  }
+
+  public SeparatedString removeAll(List<Object> baddies) {
+    return htmlTableFormatter.removeAll(baddies);
+  }
+
+  public SeparatedString removeAll(Map<String, Object> c) {
     return htmlTableFormatter.removeAll(c);
   }
 

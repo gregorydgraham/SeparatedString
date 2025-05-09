@@ -30,6 +30,11 @@
  */
 package nz.co.gregs.separatedstring;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import org.junit.Test;
@@ -47,7 +52,7 @@ public class SeparatedStringBuilderTest {
   public void testHTMLOrderedList() {
     SeparatedString sep = SeparatedStringBuilder.htmlOrderedList();
     sep.add(1);
-    sep.addAll(2, 3, "More");
+    sep.addAll("2", "3", "More");
     String encoded = sep.encode();
     System.out.println(encoded);
     System.out.println("<ol>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ol>\n");
@@ -58,10 +63,70 @@ public class SeparatedStringBuilderTest {
   public void testHTMLUnorderedList() {
     SeparatedString sep = SeparatedStringBuilder.htmlUnorderedList();
     sep.add(1);
-    sep.addAll(2, 3, "More");
+    sep.addAll("2", "3", "More");
     String encoded = sep.encode();
     System.out.println(encoded);
     System.out.println("<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ul>\n");
     assertThat(encoded, is("<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ul>\n"));
+  }
+
+  @Test
+  public void testMapEncoding() {
+
+    SeparatedString extrasEncoder = SeparatedStringBuilder
+            .forSeparator(";")
+            .withKeyValueSeparator("=")
+            .setFormatFor(Instant.class, d -> DATETIME_FORMAT.format(d))
+            .withEscapeChar("!");
+    
+    String value = extrasEncoder.addAll(new HashMap<>(0)).encode();
+    assertThat(value, is(""));
+    final HashMap<String, Object> hashMap = new HashMap<>(0);
+    hashMap.put("first", "1");
+    hashMap.put("second", 2);
+    hashMap.put("third", Instant.ofEpochMilli(0l));
+    value = extrasEncoder.addAll(hashMap).encode();
+    assertThat(value, is("third=1970-01-01 12:00;first=1;second=2"));
+    extrasEncoder.removeAll(hashMap);
+    extrasEncoder.addAll(extrasEncoder.parseToMap(value));
+    assertThat(extrasEncoder.encode(), is("third=1970-01-01 12:00;first=1;second=2"));
+    
+
+  }
+  private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
+
+  @Test
+  public void testEncodingStressTest() {
+    SeparatedString clusterHostEncoder = SeparatedStringBuilder
+            .forSeparator("|")
+            .withPrefix("<")
+            .withSuffix(">")
+            .withEscapeChar("!");
+    String clusterHostsEncoded = clusterHostEncoder.addAll(new ArrayList<>(0)).encode();
+
+    SeparatedString extrasEncoder = SeparatedStringBuilder
+            .forSeparator(";")
+            .withKeyValueSeparator("=")
+            .withEscapeChar("!");
+    String extrasEncoded = extrasEncoder.addAll(new HashMap<>(0)).encode();
+
+    SeparatedString mainEncoder = SeparatedStringBuilder.forSeparator(", ").withEscapeChar("\\").withPrefix("DATABASECONNECTIONSETTINGS: ");
+    mainEncoder.addAll(
+            "nz.co.gregs.dbvolution.databases.H2MemoryDB",
+            "localhost",
+            "9123",
+            "",
+            "unknown",
+            "",
+            "",
+            "",
+            "",
+            "soloDB2",
+            "",
+            clusterHostsEncoded,
+            extrasEncoded
+    );
+    String value = mainEncoder.encode();
+    assertThat(value, is("DATABASECONNECTIONSETTINGS: nz.co.gregs.dbvolution.databases.H2MemoryDB, localhost, 9123, , unknown, , , , , soloDB2, , , "));
   }
 }

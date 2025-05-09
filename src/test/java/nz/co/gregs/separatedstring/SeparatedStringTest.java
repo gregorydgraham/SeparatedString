@@ -33,7 +33,6 @@ package nz.co.gregs.separatedstring;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import nz.co.gregs.looper.Looper;
@@ -70,7 +69,7 @@ public class SeparatedStringTest {
     sepString.setFormatFor(Instant.class, (Instant d) -> {
       return (DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault()).format(d));
     });
-    sepString.addAll("alpha", Instant.ofEpochMilli(0l), "beta");
+    sepString.addAll(List.of("alpha", Instant.ofEpochMilli(0l), "beta"));
     String result = sepString.encode();
 
     System.out.println("RESULT: " + result);
@@ -257,7 +256,7 @@ public class SeparatedStringTest {
 
   @Test
   public void testCommaSpaceParsingUsingEncodeStringList() {
-    List<String> arrayList = Arrays.asList(new String[]{"aaa", "bbb", "ddd", "ccc"});
+    List<Object> arrayList = List.of("aaa", "bbb", "ddd", "ccc");
     final SeparatedString sepString = SeparatedStringBuilder.byCommaSpace();
     String encoded = sepString.encode(arrayList);
     assertThat(encoded, is("aaa, bbb, ddd, ccc"));
@@ -480,7 +479,7 @@ public class SeparatedStringTest {
             .add("right", "20em")
             .add("border", 3)
             .encode();
-    Map<String, String> parsed = encoder.parseToMap(encoded);
+    Map<String, Object> parsed = encoder.parseToMap(encoded);
     assertThat(parsed.size(), is(3));
     assertThat(parsed.get("left"), is("10px"));
     assertThat(parsed.get("right"), is("20em"));
@@ -490,9 +489,9 @@ public class SeparatedStringTest {
             .byCommasWithQuotedTermsAndBackslashEscape()
             .parseToMap("left=10px,right=20em,border=3");
     assertThat(parsed.size(), is(3));
-    assertThat(parsed.get("left=10px"), isEmptyString());
-    assertThat(parsed.get("right=20em"), isEmptyString());
-    assertThat(parsed.get("border=3"), isEmptyString());
+    assertThat(parsed.get("left=10px").toString(), isEmptyString());
+    assertThat(parsed.get("right=20em").toString(), isEmptyString());
+    assertThat(parsed.get("border=3").toString(), isEmptyString());
 
     parsed = SeparatedStringBuilder
             .byCommasWithQuotedTermsAndBackslashEscape()

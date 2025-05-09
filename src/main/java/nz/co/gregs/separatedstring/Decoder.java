@@ -38,13 +38,18 @@ import java.util.Map;
  * @author gregorygraham
  */
 public class Decoder {
-  
+
   private final SeparatedString separatedString;
 
   protected Decoder(SeparatedString sep) {
     separatedString = sep;
   }
-  public Encoder encoder(){
+
+  public Builder builder() {
+    return new Builder(separatedString);
+  }
+
+  public Encoder encoder() {
     return new Encoder(separatedString);
   }
 
@@ -64,7 +69,7 @@ public class Decoder {
     return separatedString.parseToArray(input);
   }
 
-  public Map<String, String> parseToMap(String input) {
+  public Map<String, Object> parseToMap(String input) {
     return separatedString.parseToMap(input);
   }
 }
