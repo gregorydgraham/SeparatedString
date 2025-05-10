@@ -166,4 +166,8 @@ public class Encoder {
     return separatedString.remove(index);
   }
 
+  protected SeparatedString getSeparatedString() {
+    return separatedString;
+  }
+
 }

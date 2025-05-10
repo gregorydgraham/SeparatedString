@@ -78,7 +78,7 @@ public class Builder {
     return new Decoder(separatedString);
   }
 
-  public Builder trimBlanks() {
+  public Builder withBlanksTrimmed() {
     separatedString.trimBlanks();
     return this;
   }
