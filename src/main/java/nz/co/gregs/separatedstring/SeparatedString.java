@@ -409,6 +409,7 @@ public class SeparatedString {
     list.add(useWhenEmpty, escapeChar + useWhenEmpty);
     list.add(wrapAfter, escapeChar + wrapAfter);
     list.add(wrapBefore, escapeChar + wrapBefore);
+    list.add(wrapBefore, escapeChar + wrapBefore);
     return list;
   }
 
@@ -426,6 +427,10 @@ public class SeparatedString {
           }
           result = result.replace(seqKey, value);
         }
+      }
+      if (trimBlanks) {
+        result = result.replaceAll("^ *", "");
+        result = result.replaceAll(" *$", "");
       }
       return result;
     }
