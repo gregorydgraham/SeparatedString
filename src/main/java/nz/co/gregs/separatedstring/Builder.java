@@ -40,6 +40,24 @@ public class Builder {
 
   private final SeparatedString separatedString;
 
+  /**
+   * Get a separated string Builder.
+   * 
+   * <p>The same as the {@link #start() } method.</p>
+   * 
+   * @return a separated string builder
+   */
+  public static Builder go() {
+    return start();
+  }
+  
+  /**
+   * Get a separated string Builder.
+   * 
+   * <p>The same as the {@link #go() } method.</p>
+   * 
+   * @return a separated string builder
+   */
   public static Builder start() {
     return new Builder();
   }
@@ -165,7 +183,11 @@ public class Builder {
    * @return a Builder
    */
   public static Builder csv() {
-    return byCommasWithQuotedTermsAndBackslashEscape().withKeyValueSeparator("=");
+    return forSeparator(", ")
+            .withThisBeforeEachTerm("\"")
+            .withThisAfterEachTerm("\"")
+            .withEscapeChar("\\")
+            .withKeyValueSeparator("=");
   }
 
   /**
@@ -264,7 +286,7 @@ public class Builder {
    * @return a SeparateString
    */
   public static Builder byCommasWithQuotedTermsAndBackslashEscape() {
-    return byCommas()
+    return forSeparator(", ")
             .withThisBeforeEachTerm("\"")
             .withThisAfterEachTerm("\"")
             .withEscapeChar("\\");
@@ -350,6 +372,11 @@ public class Builder {
 
   protected SeparatedString getSeparatedString() {
     return separatedString;
+  }
+
+  public Builder withNoLoop() {
+    separatedString.withNoLoop();
+    return this;
   }
 
 }

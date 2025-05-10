@@ -72,7 +72,7 @@ public class SeparatedString {
   private String escapeChar = "";
   private String useWhenEmpty = "";
   private String keyValueSeparator = "";
-  private ClosedLoop closedLoop = ClosedLoop.Unaltered;
+  private ClosedLoop closedLoop = ClosedLoop.NotLoop;
   private boolean trimBlanks = false;
   private boolean retainNulls = false;
   private String retainNullString = "null";
@@ -81,7 +81,7 @@ public class SeparatedString {
   private String lineStart = "";
 
   public enum ClosedLoop {
-    Closed, Open, Unaltered;
+    Closed, Open, NotLoop;
 
     private static boolean isClosed(ClosedLoop closedLoop) {
       return Closed.equals(closedLoop);
@@ -469,7 +469,7 @@ public class SeparatedString {
     final StringEntry[] iterator = strings.toArray(new StringEntry[]{});
     for (int i = 0; i < iterator.length; i++) {
       StringEntry next = iterator[i];
-      if (baddies.contains(next.getKey())){
+      if (baddies.contains(next.getKey())) {
         strings.remove(next);
       }
     }
@@ -1354,7 +1354,21 @@ public class SeparatedString {
     return getCtrlSequences();
   }
 
+  /**
+   * Returns true if null values will treated differently from empty strings
+   *
+   * @return if (null != "") then TRUE else FALSE
+   */
   public boolean getRetainNulls() {
+    return retainNulls;
+  }
+
+  /**
+   * Returns true if null values will treated differently from empty strings
+   *
+   * @return if (null != "") then TRUE else FALSE
+   */
+  public boolean isRetainingNulls() {
     return retainNulls;
   }
 
@@ -1375,11 +1389,11 @@ public class SeparatedString {
     return newVersion;
   }
 
-  private String getLineEnd() {
+  protected String getLineEnd() {
     return lineEnd;
   }
 
-  private String getLineStart() {
+  protected String getLineStart() {
     return lineStart;
   }
 
@@ -1403,4 +1417,22 @@ public class SeparatedString {
   protected boolean isUniqueValuesOnly() {
     return uniqueValuesOnly;
   }
+
+  protected boolean isClosedLoop() {
+    return ClosedLoop.Closed.equals(closedLoop);
+  }
+
+  protected boolean isOpenLoop() {
+    return ClosedLoop.Open.equals(closedLoop);
+  }
+
+  protected boolean isNotLoop() {
+    return ClosedLoop.NotLoop.equals(closedLoop);
+  }
+
+  protected SeparatedString withNoLoop() {
+    closedLoop = ClosedLoop.NotLoop;
+    return this;
+  }
+
 }

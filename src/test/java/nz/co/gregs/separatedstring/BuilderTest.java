@@ -52,6 +52,27 @@ public class BuilderTest {
     Builder builder = Builder.start();
 
     MatcherAssert.assertThat(builder, notNullValue(Builder.class));
+    
+    SeparatedString separatedString = builder.getSeparatedString();
+    
+    MatcherAssert.assertThat(separatedString.getEmptyValue(), is(""));
+    MatcherAssert.assertThat(separatedString.getEscapeChar(), is(""));
+    MatcherAssert.assertThat(separatedString.getKeyValueSeparator(), is(""));
+    MatcherAssert.assertThat(separatedString.getLineEnd(), is(""));
+    MatcherAssert.assertThat(separatedString.getLineStart(), is(""));
+    MatcherAssert.assertThat(separatedString.getNullRepresentation(), is("null"));
+    MatcherAssert.assertThat(separatedString.getPrefix(), is(""));
+    MatcherAssert.assertThat(separatedString.getSeparator(), is(" "));
+    MatcherAssert.assertThat(separatedString.getSuffix(), is(""));
+    MatcherAssert.assertThat(separatedString.getWrapAfter(), is(""));
+    MatcherAssert.assertThat(separatedString.getWrapBefore(), is(""));
+    MatcherAssert.assertThat(separatedString.isClosedLoop(), is(false));
+    MatcherAssert.assertThat(separatedString.isEmpty(), is(true));
+    MatcherAssert.assertThat(separatedString.isNotLoop(), is(true));
+    MatcherAssert.assertThat(separatedString.isOpenLoop(), is(false));
+    MatcherAssert.assertThat(separatedString.isRetainingNulls(), is(false));
+    MatcherAssert.assertThat(separatedString.isTrimBlanks(), is(false));
+    MatcherAssert.assertThat(separatedString.isUniqueValuesOnly(), is(false));
   }
 
   @Test
@@ -118,6 +139,180 @@ public class BuilderTest {
     builder.setFormatFor(Instant.class, formatter);
     SeparatedString separatedString = builder.getSeparatedString();
     MatcherAssert.assertThat(separatedString.getFormatterFor(Instant.now()), is(formatter));
+  }
+
+  @Test
+  public void testWithNullAs() {
+    Builder builder = Builder.start();
+    builder.withNullsAs("~");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getNullRepresentation(), is("~"));
+  }
+
+  @Test
+  public void testWithNoLoop() {
+    Builder builder = Builder.start();
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.isNotLoop(), is(true));
+    MatcherAssert.assertThat(separatedString.isOpenLoop(), is(false));
+    MatcherAssert.assertThat(separatedString.isClosedLoop(), is(false));
+
+    builder = Builder.start();
+    builder.withClosedLoop();
+    builder.withNoLoop();
+    separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.isNotLoop(), is(true));
+    MatcherAssert.assertThat(separatedString.isOpenLoop(), is(false));
+    MatcherAssert.assertThat(separatedString.isClosedLoop(), is(false));
+  }
+
+  @Test
+  public void testWithOpenLoop() {
+    Builder builder = Builder.start();
+    builder.withOpenLoop();
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.isNotLoop(), is(false));
+    MatcherAssert.assertThat(separatedString.isOpenLoop(), is(true));
+    MatcherAssert.assertThat(separatedString.isClosedLoop(), is(false));
+  }
+
+  @Test
+  public void testWithClosedLoop() {
+    Builder builder = Builder.go();
+    builder.withClosedLoop();
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.isNotLoop(), is(false));
+    MatcherAssert.assertThat(separatedString.isOpenLoop(), is(false));
+    MatcherAssert.assertThat(separatedString.isClosedLoop(), is(true));
+  }
+
+  @Test
+  public void testWithEachTermPrecededAndFollowedWith() {
+    Builder builder = Builder.start();
+    builder.withEachTermPrecededAndFollowedWith("~");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getWrapBefore(), is("~"));
+    MatcherAssert.assertThat(separatedString.getWrapAfter(), is("~"));
+  }
+
+  @Test
+  public void testWithEachTermWrappedWith() {
+    Builder builder = Builder.start();
+    builder.withEachTermWrappedWith("~", "!");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getWrapBefore(), is("~"));
+    MatcherAssert.assertThat(separatedString.getWrapAfter(), is("!"));
+  }
+
+  @Test
+  public void testWithThisBeforeEachTerm() {
+    Builder builder = Builder.start();
+    builder.withThisBeforeEachTerm("~");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getWrapBefore(), is("~"));
+  }
+
+  @Test
+  public void testWithThisAfterEachTerm() {
+    Builder builder = Builder.start();
+    builder.withThisAfterEachTerm("~");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getWrapAfter(), is("~"));
+  }
+
+  @Test
+  public void testWithPrefix() {
+    Builder builder = Builder.start();
+    builder.withPrefix("~");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getPrefix(), is("~"));
+  }
+
+  @Test
+  public void testWithSuffix() {
+    Builder builder = Builder.start();
+    builder.withSuffix("!");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getSuffix(), is("!"));
+  }
+
+  @Test
+  public void testWithNullsRetained() {
+    Builder builder = Builder.start();
+    builder.withNullsRetained(true);
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.isRetainingNulls(), is(true));
+  }
+
+  @Test
+  public void testUseWhenEmpty() {
+    Builder builder = Builder.start();
+    builder.useWhenEmpty("~");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getEmptyValue(), is("~"));
+  }
+
+  @Test
+  public void testWithLineEndSequence() {
+    Builder builder = Builder.start();
+    builder.withLineEndSequence("~");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getLineEnd(), is("~"));
+  }
+
+  @Test
+  public void testWithLineStartSequence() {
+    Builder builder = Builder.start();
+    builder.withLineStartSequence("~");
+    SeparatedString separatedString = builder.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getLineStart(), is("~"));
+  }
+
+  @Test
+  public void testCSV() {
+    Builder csv = Builder.csv();
+    SeparatedString separatedString = csv.getSeparatedString();
+    MatcherAssert.assertThat(separatedString.getSeparator(), is(", "));
+    MatcherAssert.assertThat(separatedString.getWrapBefore(), is("\""));
+    MatcherAssert.assertThat(separatedString.getWrapAfter(), is("\""));
+    MatcherAssert.assertThat(separatedString.getEscapeChar(), is("\\"));
+    MatcherAssert.assertThat(separatedString.getKeyValueSeparator(), is("="));
+  }
+
+  @Test
+  public void testTSV() {
+    Builder tsv = Builder.tsv();
+    SeparatedString separatedString = tsv.getSeparatedString();
+    
+    MatcherAssert.assertThat(separatedString.getSeparator(), is("\t"));
+    MatcherAssert.assertThat(separatedString.getWrapBefore(), is("\""));
+    MatcherAssert.assertThat(separatedString.getWrapAfter(), is("\""));
+    MatcherAssert.assertThat(separatedString.getEscapeChar(), is("\\"));
+    MatcherAssert.assertThat(separatedString.getKeyValueSeparator(), is("="));
+  }
+
+  @Test
+  public void testHtmlOrderedList() {
+    Builder tsv = Builder.htmlOrderedList();
+    SeparatedString separatedString = tsv.getSeparatedString();
+    
+    MatcherAssert.assertThat(separatedString.getSeparator(), is("\n"));
+    MatcherAssert.assertThat(separatedString.getWrapBefore(), is("<li>"));
+    MatcherAssert.assertThat(separatedString.getWrapAfter(), is("</li>"));
+    MatcherAssert.assertThat(separatedString.getPrefix(), is("<ol>\n"));
+    MatcherAssert.assertThat(separatedString.getSuffix(), is("\n</ol>\n"));
+  }
+
+  @Test
+  public void testHtmlUnorderedList() {
+    Builder tsv = Builder.htmlUnorderedList();
+    SeparatedString separatedString = tsv.getSeparatedString();
+    
+    MatcherAssert.assertThat(separatedString.getSeparator(), is("\n"));
+    MatcherAssert.assertThat(separatedString.getWrapBefore(), is("<li>"));
+    MatcherAssert.assertThat(separatedString.getWrapAfter(), is("</li>"));
+    MatcherAssert.assertThat(separatedString.getPrefix(), is("<ul>\n"));
+    MatcherAssert.assertThat(separatedString.getSuffix(), is("\n</ul>\n"));
   }
 
 }
