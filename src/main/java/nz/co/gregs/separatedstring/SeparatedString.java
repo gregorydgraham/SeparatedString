@@ -327,11 +327,14 @@ public class SeparatedString {
       build.append(replaceSequencesInString(element.getKey(), getReplacementSequences()));
       build.append(getKeyValueSeparator());
     }
-    Object object = element.getValue();
-    String string = format(object);
-    build.append(replaceSequencesInString(string, getReplacementSequences()));
+    build.append(formatEntryValue(element.getValue()));
 
     return build.toString();
+  }
+
+  protected <T> String formatEntryValue(T value) {
+    String string = format(value);
+    return replaceSequencesInString(string, getReplacementSequences());
   }
 
   /**
@@ -471,11 +474,21 @@ public class SeparatedString {
    * @return this SeparatedString
    */
   public SeparatedString removeAll(List<Object> baddies) {
-    final StringEntry[] iterator = strings.toArray(new StringEntry[]{});
-    for (int i = 0; i < iterator.length; i++) {
-      StringEntry next = iterator[i];
-      if (baddies.contains(next.getKey())) {
-        strings.remove(next);
+    final StringEntry[] safeArray = strings.toArray(new StringEntry[]{});
+    for (StringEntry next : safeArray) {
+      if (next.hasKey()) {
+        final String key = next.getKey();
+        if (key != null && baddies.contains(key)) {
+          strings.remove(next);
+        }
+      } else {
+        if (baddies.contains(next.getValue())) {
+          strings.remove(next);
+        } else if (baddies.contains(next.getValue())) {
+          strings.remove(next);
+        } else if (baddies.contains(formatEntryValue(next.getValue()))) {
+          strings.remove(next);
+        }
       }
     }
     return this;
@@ -644,26 +657,8 @@ public class SeparatedString {
       strings.add(new StringEntry(str));
     }
     return this;
-//    return addAll((Object[]) strs);
   }
 
-  /**
-   * Adds all values to the values within this SeparatedString.
-   *
-   * @param strs several objects to be added as values
-   * @return this SeparatedString
-   */
-//  public <T> SeparatedString addAll(T... strs) {
-//    final List<StringEntry> asList
-//            = Arrays.asList(strs)
-//                    .stream()
-//                    .map((t) -> new StringEntry(t))
-//                    .collect(Collectors.toList());
-//    if (asList != null) {
-//      strings.addAll(asList);
-//    }
-//    return this;
-//  }
   /**
    * Adds all values to the values within this SeparatedString.
    *
@@ -699,11 +694,16 @@ public class SeparatedString {
   /**
    * Removes the value at the index from the values within this SeparatedString.
    *
+   * <p>
+   * Will do nothing if the index is out of bounds</p>
+   *
    * @param index the index of the value to remove
    * @return this SeparatedString
    */
   public SeparatedString remove(int index) {
-    strings.remove(index);
+    if (index >= 0 && index < strings.size()) {
+      strings.remove(index);
+    }
     return this;
   }
 
@@ -776,6 +776,13 @@ public class SeparatedString {
 
   /**
    * Inserts the specified elements into the list of known values.
+   *
+   * <p>
+   * <code>containing(Object...)</code> is a synonym for {@link #addAll(java.lang.String...) } that allows any object class to be added. It would be preferable
+   * to have an <code>addAll(Object...)</code> but that would mask the {@link #addAll(java.lang.String...) } method and make the API more difficult to
+   * understand. Arguably this method is also difficult to understand but I've judged it more important to have obvious access to String addition than the more
+   * obtuse options for random objects.</p>
+   *
    *
    * @param strings elements to be inserted
    * @return this

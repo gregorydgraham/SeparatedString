@@ -32,6 +32,7 @@ package nz.co.gregs.separatedstring;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
 import org.hamcrest.MatcherAssert;
@@ -141,7 +142,7 @@ public class BuilderTest {
 
   @Test
   public void testSetFormatFor() {
-    DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH24:mm:ss").withZone(ZoneId.systemDefault());
+    DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH24:mm:ss").withZone(ZoneOffset.UTC);
     Builder builder = Builder.start();
     final Function<Instant, String> formatter = d -> DATETIME_FORMAT.format(d);
     builder.setFormatFor(Instant.class, formatter);

@@ -137,6 +137,20 @@ public class Encoder {
     return this;
   }
 
+  /**
+   * Inserts the specified elements into the list of known values.
+   *
+   * <p>
+   * <code>containing(Object...)</code> is a synonym for {@link #addAll(java.lang.String...) } that allows any object class to be added. It would be preferable
+   * to have an <code>addAll(Object...)</code> but that would mask the {@link #addAll(java.lang.String...) } method and make the API more difficult to
+   * understand. Arguably this method is also difficult to understand but I've judged it more important to have obvious access to String addition than the more
+   * obtuse options for random objects.</p>
+   *
+   *
+   * @param strings elements to be inserted
+   * @return this
+   * @throws IndexOutOfBoundsException {@inheritDoc}
+   */
   public Encoder containing(Object... strings) {
     separatedString.containing(strings);
     return this;
@@ -162,6 +176,15 @@ public class Encoder {
     return separatedString.removeAll(c);
   }
 
+  /**
+   * Removes the value at the index from the values within this SeparatedString.
+   *
+   * <p>
+   * Will do nothing if the index is out of bounds</p>
+   *
+   * @param index the index of the value to remove
+   * @return this SeparatedString
+   */
   public SeparatedString remove(int index) {
     return separatedString.remove(index);
   }

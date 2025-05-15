@@ -30,9 +30,14 @@
  */
 package nz.co.gregs.separatedstring;
 
+import java.awt.Color;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -118,75 +123,166 @@ public class EncoderTest {
   @Test
   public void testCreateBuilder() {
     Encoder encoder = Builder.start().encoder();
-    Builder otherBuilder = new Builder(encoder.getSeparatedString());
+    Builder otherBuilder = encoder.builder();
 
     assertThat(otherBuilder, notNullValue(Builder.class));
   }
 
   @Test
-  public void testTrimBlanks() {
+  public void testAddAllIntList() {
     Encoder encoder = Builder.start().separatedBy(",").withBlanksTrimmed().encoder();
     SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.isTrimBlanks(), is(true));
-    encoder.add("blart");
-    encoder.add("blert   ");
-    encoder.add("    blirt  ");
-    String encode = encoder.encode();
-    assertThat(encode, is("blart,blert,blirt"));
+    encoder.addAll(0, List.of("blart", "blort   ", "    blurt  "));
+    assertThat(encoder.encode(), is("blart,blort,blurt"));
+    encoder.addAll(1, List.of("blert   ", "blirt", "  middle  of list"));
+    assertThat(encoder.encode(), is("blart,blert,blirt,middle  of list,blort,blurt"));
   }
 
   @Test
-  public void testWithOnlyUniqueValues() {
-    Builder builder = Builder.start();
-    builder.withOnlyUniqueValues();
-    SeparatedString separatedString = builder.getSeparatedString();
+  public void testEncodeStringArray() {
+    Encoder encoder = Builder.start().separatedBy(",").withBlanksTrimmed().encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
+    assertThat(separatedString.isTrimBlanks(), is(true));
+    assertThat(encoder.encode("blart", "blort   ", "    blurt  "), is("blart,blort,blurt"));
+    assertThat(encoder.encode("blert   ", "blirt", "  end  of list"), is("blert,blirt,end  of list"));
+  }
+
+  @Test
+  public void testEncodeList() {
+    Encoder encoder = Builder.start().separatedBy(",").withBlanksTrimmed().encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
+    assertThat(separatedString.isTrimBlanks(), is(true));
+    assertThat(encoder.encode(List.of("blart", "blort   ", "    blurt  ")), is("blart,blort,blurt"));
+    assertThat(encoder.encode(List.of("blert   ", "blirt", "  end  of list")), is("blert,blirt,end  of list"));
+  }
+
+  @Test
+  public void testAddStringString() {
+    Encoder encoder = Builder.start().withOnlyUniqueValues().withKeyValueSeparator("=").encoder();
+    encoder.add("a", "1");
+    encoder.add("b", "2");
+    SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.isUniqueValuesOnly(), is(true));
+    assertThat(encoder.encode(), is("a=1 b=2"));
+
+    encoder = Builder.start().withOnlyUniqueValues().withKeyValueSeparator("=").encoder();
+    encoder.add("a", "1");
+    encoder.add("b", "2");
+    encoder.add("a", "1");
+    encoder.add("b", "2");
+    separatedString = encoder.getSeparatedString();
+    assertThat(separatedString.isUniqueValuesOnly(), is(true));
+    assertThat(encoder.encode(), is("a=1 b=2"));
+
   }
 
   @Test
-  public void testSeparator() {
-    Builder builder = Builder.start();
-    builder.separatedBy("~");
-    SeparatedString separatedString = builder.getSeparatedString();
+  public void testAddAll() {
+    Encoder encoder = Builder.start().separatedBy("~").encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.getSeparator(), is("~"));
+    encoder.addAll(List.of("blart", "blort   ", "    blurt  "));
+    assertThat(encoder.encode(), is("blart~blort   ~    blurt  "));
+    encoder.addAll(List.of("blert   ", "blirt", "  end  of list"));
+    assertThat(encoder.encode(), is("blart~blort   ~    blurt  ~blert   ~blirt~  end  of list"));
   }
 
   @Test
-  public void testWithEscapeChar() {
-    Builder builder = Builder.start();
-    builder.withEscapeChar("~");
-    SeparatedString separatedString = builder.getSeparatedString();
+  public void testAddStringObject() {
+    Encoder encoder = Builder.start().withEscapeChar("~").withKeyValueSeparator(":>").encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.getEscapeChar(), is("~"));
+    encoder.add("a", 1);
+    encoder.add("b", 2.3);
+    encoder.add("c", Instant.EPOCH);
+    encoder.add("d", ":>");
+    assertThat(encoder.encode(), is("a:>1 b:>2.3 c:>1970-01-01T00:00:00Z d:>~:>"));
   }
 
   @Test
-  public void testKeyValueSeparator() {
-    Builder builder = Builder.start();
-    builder.withKeyValueSeparator("~");
-    SeparatedString separatedString = builder.getSeparatedString();
+  public void testAddAllMap() {
+    Encoder encoder = Builder.start().withKeyValueSeparator("~").encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.getKeyValueSeparator(), is("~"));
+    Map<String, Object> map = new HashMap<>();
+    map.put("a", 1);
+    map.put("b", 2.3);
+    map.put("c", Instant.EPOCH);
+    map.put("d", ":>");
+    encoder.addAll(map);
+    assertThat(encoder.encode(), is("a~1 b~2.3 c~1970-01-01T00:00:00Z d~:>"));
   }
 
   @Test
-  public void testSetFormatFor() {
-    DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH24:mm:ss").withZone(ZoneId.systemDefault());
-    Builder builder = Builder.start();
+  public void testAddLineStringArray() {
+    DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH24:mm").withZone(ZoneOffset.UTC);
     final Function<Instant, String> formatter = d -> DATETIME_FORMAT.format(d);
-    builder.setFormatFor(Instant.class, formatter);
-    SeparatedString separatedString = builder.getSeparatedString();
+    Encoder encoder = Builder.start().setFormatFor(Instant.class, formatter).encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.getFormatterFor(Instant.now()), is(formatter));
+    encoder
+            .addLine("a", "b", "c", "d", "e")
+            .addLine("a", "b", "c", "d", "e")
+            .addLine()
+            .addLine("1", "2", "3");
+    assertThat(encoder.encode(), is("a b c d e\na b c d e\n\n1 2 3\n"));
   }
 
   @Test
-  public void testWithNullAs() {
-    Builder builder = Builder.start();
-    builder.withNullsAs("~");
-    SeparatedString separatedString = builder.getSeparatedString();
+  public void testAddLine() {
+    DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH24:mm").withZone(ZoneOffset.UTC);
+    final Function<Instant, String> formatter = d -> DATETIME_FORMAT.format(d);
+    Encoder encoder = Builder.start().setFormatFor(Instant.class, formatter).encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
+    assertThat(separatedString.getFormatterFor(Instant.now()), is(formatter));
+    encoder
+            .addLine("a", "b", "c", "d", "e")
+            .addLine("a", "b", "c", "d", "e")
+            .addLine()
+            .addLine("1", "2", "3");
+    assertThat(encoder.encode(), is("a b c d e\na b c d e\n\n1 2 3\n"));
+  }
+
+  @Test
+  public void testAddAllFunctionList() {
+    DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mmZ").withZone(ZoneOffset.UTC);
+    final Function<Instant, String> formatter = d -> DATETIME_FORMAT.format(d);
+    Encoder encoder = Builder.start().separatedBy(",").withBlanksTrimmed().encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
+    assertThat(separatedString.isTrimBlanks(), is(true));
+    List<Instant> instants = List.of(Instant.EPOCH, Instant.EPOCH.plusSeconds(1000000));
+    encoder.addAll(formatter, instants);
+    assertThat(encoder.encode(), is("1970-01-01 00:00+0000,1970-01-12 13:46+0000"));
+  }
+
+  @Test
+  public void testAddAllFunctionArray() {
+    DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mmZ").withZone(ZoneOffset.UTC);
+    final Function<Instant, String> formatter = d -> DATETIME_FORMAT.format(d);
+    Encoder encoder = Builder.start().separatedBy(",").withBlanksTrimmed().encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
+    assertThat(separatedString.isTrimBlanks(), is(true));
+    encoder.addAll(formatter, Instant.EPOCH, Instant.EPOCH.plusSeconds(1000000));
+    assertThat(encoder.encode(), is("1970-01-01 00:00+0000,1970-01-12 13:46+0000"));
+  }
+
+  @Test
+  public void testAddIntString() {
+    Encoder encoder = Builder.start().withNullsAs("~").encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.getNullRepresentation(), is("~"));
+    encoder.add(0, "blert");
+    encoder.add(0, "blart");
+    encoder.add(2, "blort");
+    encoder.add(2, "blirt");
+    encoder.add(4, "blurt");
+    encoder.add(5, null);
+    assertThat(encoder.encode(), is("blart blert blirt blort blurt ~"));
   }
 
   @Test
-  public void testWithNoLoop() {
+  public void testAddIntObject() {
     Builder builder = Builder.start();
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.isNotLoop(), is(true));
@@ -200,84 +296,179 @@ public class EncoderTest {
     assertThat(separatedString.isNotLoop(), is(true));
     assertThat(separatedString.isOpenLoop(), is(false));
     assertThat(separatedString.isClosedLoop(), is(false));
+
+    Encoder encoder = builder.encoder();
+    encoder.add(0, 1);
+    encoder.add(0, Instant.EPOCH);
+    encoder.add(2, Color.RED);
+    assertThat(encoder.encode(), is("1970-01-01T00:00:00Z 1 java.awt.Color[r=255,g=0,b=0]"));
+    encoder.add(2, Color.RED);
+    assertThat(encoder.encode(), is("1970-01-01T00:00:00Z 1 java.awt.Color[r=255,g=0,b=0] java.awt.Color[r=255,g=0,b=0]"));
   }
 
   @Test
-  public void testWithOpenLoop() {
+  public void testAddString() {
     Builder builder = Builder.start();
     builder.withOpenLoop();
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.isNotLoop(), is(false));
     assertThat(separatedString.isOpenLoop(), is(true));
     assertThat(separatedString.isClosedLoop(), is(false));
+
+    Encoder encoder = builder.encoder();
+    encoder.add("Anna");
+    encoder.add("Bob");
+    encoder.add("Carmen");
+    assertThat(encoder.encode(), is("Anna Bob Carmen"));
+    encoder.add("Anna");
+    assertThat(encoder.encode(), is("Anna Bob Carmen"));
+    encoder.add("Dave");
+    assertThat(encoder.encode(), is("Anna Bob Carmen Anna Dave"));
   }
 
   @Test
-  public void testWithClosedLoop() {
+  public void testAddObject() {
     Builder builder = Builder.go();
     builder.withClosedLoop();
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.isNotLoop(), is(false));
     assertThat(separatedString.isOpenLoop(), is(false));
     assertThat(separatedString.isClosedLoop(), is(true));
+
+    Encoder encoder = builder.encoder();
+    encoder.add(Color.RED);
+    encoder.add(Color.GREEN);
+    encoder.add(Color.BLUE);
+    assertThat(encoder.encode(), is("java.awt.Color[r=255,g=0,b=0] java.awt.Color[r=0,g=255,b=0] java.awt.Color[r=0,g=0,b=255] java.awt.Color[r=255,g=0,b=0]"));
+    encoder.add(Color.RED);
+    assertThat(encoder.encode(), is("java.awt.Color[r=255,g=0,b=0] java.awt.Color[r=0,g=255,b=0] java.awt.Color[r=0,g=0,b=255] java.awt.Color[r=255,g=0,b=0]"));
+    encoder.add(Color.BLACK);
+    assertThat(encoder.encode(), is("java.awt.Color[r=255,g=0,b=0] java.awt.Color[r=0,g=255,b=0] java.awt.Color[r=0,g=0,b=255] java.awt.Color[r=255,g=0,b=0] java.awt.Color[r=0,g=0,b=0] java.awt.Color[r=255,g=0,b=0]"));
   }
 
   @Test
-  public void testWithEachTermPrecededAndFollowedWith() {
+  public void testContainingObjectArray() {
     Builder builder = Builder.start();
     builder.withEachTermPrecededAndFollowedWith("~");
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.getWrapBefore(), is("~"));
     assertThat(separatedString.getWrapAfter(), is("~"));
+
+    Encoder encoder = builder.encoder();
+    encoder.containing(Color.RED, Color.GREEN, Color.BLUE);
+    assertThat(encoder.encode(), is("~java.awt.Color[r=255,g=0,b=0]~ ~java.awt.Color[r=0,g=255,b=0]~ ~java.awt.Color[r=0,g=0,b=255]~"));
+    encoder.containing(Color.RED);
+    assertThat(encoder.encode(), is("~java.awt.Color[r=255,g=0,b=0]~ ~java.awt.Color[r=0,g=255,b=0]~ ~java.awt.Color[r=0,g=0,b=255]~ ~java.awt.Color[r=255,g=0,b=0]~"));
+    encoder.containing(Color.BLACK);
+    assertThat(encoder.encode(), is("~java.awt.Color[r=255,g=0,b=0]~ ~java.awt.Color[r=0,g=255,b=0]~ ~java.awt.Color[r=0,g=0,b=255]~ ~java.awt.Color[r=255,g=0,b=0]~ ~java.awt.Color[r=0,g=0,b=0]~"));
   }
 
   @Test
-  public void testWithEachTermWrappedWith() {
+  public void testIsNotEmpty() {
     Builder builder = Builder.start();
     builder.withEachTermWrappedWith("~", "!");
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.getWrapBefore(), is("~"));
     assertThat(separatedString.getWrapAfter(), is("!"));
+
+    Encoder encoder = builder.encoder();
+    assertThat(encoder.isNotEmpty(), is(false));
+    encoder.containing(Color.RED, Color.GREEN, Color.BLUE);
+    assertThat(encoder.isNotEmpty(), is(true));
+    assertThat(encoder.encode(), is("~java.awt.Color[r=255,g=0,b=0]! ~java.awt.Color[r=0,g=255,b=0]! ~java.awt.Color[r=0,g=0,b=255]!"));
+
   }
 
   @Test
-  public void testWithThisBeforeEachTerm() {
+  public void testIsEmpty() {
     Builder builder = Builder.start();
     builder.withThisBeforeEachTerm("~");
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.getWrapBefore(), is("~"));
+
+    Encoder encoder = builder.encoder();
+    assertThat(encoder.isEmpty(), is(true));
+    encoder.containing(Color.RED, Color.GREEN, Color.BLUE);
+    assertThat(encoder.isEmpty(), is(false));
+    assertThat(encoder.encode(), is("~java.awt.Color[r=255,g=0,b=0] ~java.awt.Color[r=0,g=255,b=0] ~java.awt.Color[r=0,g=0,b=255]"));
+
   }
 
   @Test
-  public void testWithThisAfterEachTerm() {
+  public void testRemoveAllStringArray() {
     Builder builder = Builder.start();
     builder.withThisAfterEachTerm("~");
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.getWrapAfter(), is("~"));
+
+    Encoder encoder = builder.encoder();
+    encoder.containing(Color.RED, Color.GREEN, Color.BLUE);
+    assertThat(encoder.encode(), is("java.awt.Color[r=255,g=0,b=0]~ java.awt.Color[r=0,g=255,b=0]~ java.awt.Color[r=0,g=0,b=255]~"));
+    encoder.removeAll("java.awt.Color[r=255,g=0,b=0]", "java.awt.Color[r=0,g=255,b=0]", "java.awt.Color[r=0,g=0,b=255]");
+    assertThat(encoder.encode(), is(""));
   }
 
   @Test
-  public void testWithPrefix() {
+  public void testRemoveAllList() {
     Builder builder = Builder.start();
     builder.withPrefix("~");
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.getPrefix(), is("~"));
+
+    Encoder encoder = builder.encoder();
+    encoder.containing(Color.RED, Color.GREEN, Color.BLUE);
+    assertThat(encoder.encode(), is("~java.awt.Color[r=255,g=0,b=0] java.awt.Color[r=0,g=255,b=0] java.awt.Color[r=0,g=0,b=255]"));
+    encoder.removeAll(List.of(Color.RED, Color.GREEN, Color.BLUE));
+    assertThat(encoder.encode(), is(""));
+
+    encoder.containing(Color.RED, Color.GREEN, Color.BLUE);
+    assertThat(encoder.encode(), is("~java.awt.Color[r=255,g=0,b=0] java.awt.Color[r=0,g=255,b=0] java.awt.Color[r=0,g=0,b=255]"));
+    encoder.removeAll(List.of("java.awt.Color[r=255,g=0,b=0]", "java.awt.Color[r=0,g=255,b=0]","java.awt.Color[r=0,g=0,b=255]"));
+    assertThat(encoder.encode(),is(""));
   }
 
   @Test
-  public void testWithSuffix() {
+  public void testRemoveAllMap() {
     Builder builder = Builder.start();
     builder.withSuffix("!");
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.getSuffix(), is("!"));
+    
+    Encoder encoder = builder.encoder();
+    Map<String, Object> map = new HashMap<>();
+    map.put("red", Color.RED);
+    map.put("green", Color.GREEN);
+    map.put("blue", Color.BLUE);
+    encoder.addAll(map);
+    assertThat(encoder.encode(), is("redjava.awt.Color[r=255,g=0,b=0] greenjava.awt.Color[r=0,g=255,b=0] bluejava.awt.Color[r=0,g=0,b=255]!"));
+    encoder.removeAll(new HashMap<>(0));
+    assertThat(encoder.encode(), is("redjava.awt.Color[r=255,g=0,b=0] greenjava.awt.Color[r=0,g=255,b=0] bluejava.awt.Color[r=0,g=0,b=255]!"));
+    map.remove("green");
+    encoder.removeAll(map);
+    assertThat(encoder.encode(), is("greenjava.awt.Color[r=0,g=255,b=0]!"));
+    map.put("green", Color.GREEN);
+    encoder.removeAll(map);
+    assertThat(encoder.encode(), is(""));
   }
 
   @Test
-  public void testWithNullsRetained() {
+  public void testRemoveInt() {
     Builder builder = Builder.start();
     builder.withNullsRetained(true);
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.isRetainingNulls(), is(true));
+    
+    Encoder encoder = builder.encoder();
+    encoder.addAll("red", "green", "blue");
+    assertThat(encoder.encode(), is("red green blue"));
+    encoder.remove(0);
+    assertThat(encoder.encode(), is("green blue"));
+    encoder.remove(1);
+    assertThat(encoder.encode(), is("green"));
+    encoder.remove(1);
+    assertThat(encoder.encode(), is("green"));
+    encoder.remove(0);
+    assertThat(encoder.encode(), is(""));
   }
 
   @Test
