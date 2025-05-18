@@ -214,6 +214,20 @@ public class EncoderTest {
   }
 
   @Test
+  public void testAddAllMapStringMap() {
+    Encoder encoder = Builder.start().withKeyValueSeparator("~").encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
+    assertThat(separatedString.getKeyValueSeparator(), is("~"));
+    Map<String, String> map = new HashMap<>();
+    map.put("a", "1");
+    map.put("b", "2.3");
+    map.put("c", Instant.EPOCH.toString());
+    map.put("d", ":>");
+    encoder.addAllStringMap(map);
+    assertThat(encoder.encode(), is("a~1 b~2.3 c~1970-01-01T00:00:00Z d~:>"));
+  }
+
+  @Test
   public void testAddLineStringArray() {
     DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH24:mm").withZone(ZoneOffset.UTC);
     final Function<Instant, String> formatter = d -> DATETIME_FORMAT.format(d);

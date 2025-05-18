@@ -69,7 +69,7 @@ public class Decoder {
     return separatedString.parseToArray(input);
   }
 
-  public Map<String, Object> decodeToMap(String input) {
+  public Map<String, String> decodeToMap(String input) {
     return separatedString.parseToMap(input);
   }
 

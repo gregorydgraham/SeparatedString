@@ -514,7 +514,7 @@ public class SeparatedString {
         }
       } else {
         final Object value = next.getValue();
-        if (value!=null && baddies.contains(value)) {
+        if (value != null && baddies.contains(value)) {
           strings.remove(next);
         } else if (baddies.contains(formatEntryValue(value))) {
           strings.remove(next);
@@ -597,7 +597,7 @@ public class SeparatedString {
   /**
    * Adds all values in the collection to the values within this SeparatedString.
    *
-   * @param c a collection of objects
+   * @param c a collection of String/Object mappings
    * @return this SeparatedString
    */
   public SeparatedString addAll(Map<String, Object> c) {
@@ -605,6 +605,28 @@ public class SeparatedString {
       c.forEach((key, value) -> {
         strings.add(StringEntry.of(key, value));
       });
+    }
+    return this;
+  }
+
+  /**
+   * Adds all values in the collection to the values within this SeparatedString.
+   *
+   * <p>
+   * A method for processing String/String mappings in particular as they will happen frequently. Due to Java's type-erasure it can't be called "addAll()".
+   * </p>
+   *
+   * <p>
+   * In particular, this method makes it easier to handle the disparity between the String/Object mapping used by Encoder and the String/String mapping produced
+   * by Decoder.
+   * </p>
+   *
+   * @param parsed a collection of String/String mappings
+   * @return this SeparatedString
+   */
+  public SeparatedString addAllStringMap(Map<String, String> parsed) {
+    for (Map.Entry<String, String> entry : parsed.entrySet()) {
+      add(entry.getKey(), entry.getValue());
     }
     return this;
   }
@@ -1276,8 +1298,8 @@ public class SeparatedString {
    * @param input the string to be decoded
    * @return the values found
    */
-  public Map<String, Object> parseToMap(String input) {
-    Map<String, Object> map = new HashMap<>(0);
+  public Map<String, String> parseToMap(String input) {
+    Map<String, String> map = new HashMap<>(0);
     if (input == null || input.isEmpty()) {
       return map;
     }

@@ -551,7 +551,7 @@ public class SeparatedStringTest {
             .add("right", "20em")
             .add("border", 3)
             .encode();
-    Map<String, Object> parsed = encoder.parseToMap(encoded);
+    Map<String, String> parsed = encoder.parseToMap(encoded);
     assertThat(parsed.size(), is(3));
     assertThat(parsed.get("left"), is("10px"));
     assertThat(parsed.get("right"), is("20em"));
@@ -561,9 +561,9 @@ public class SeparatedStringTest {
             .byCommasWithQuotedTermsAndBackslashEscape()
             .parseToMap("left=10px,right=20em,border=3");
     assertThat(parsed.size(), is(3));
-    assertThat(parsed.get("left=10px").toString(), isEmptyString());
-    assertThat(parsed.get("right=20em").toString(), isEmptyString());
-    assertThat(parsed.get("border=3").toString(), isEmptyString());
+    assertThat(parsed.get("left=10px"), isEmptyString());
+    assertThat(parsed.get("right=20em"), isEmptyString());
+    assertThat(parsed.get("border=3"), isEmptyString());
 
     parsed = SeparatedStringBuilder
             .byCommasWithQuotedTermsAndBackslashEscape()

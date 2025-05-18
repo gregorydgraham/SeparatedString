@@ -92,6 +92,11 @@ public class Encoder {
     return this;
   }
 
+  public Encoder addAllStringMap(Map<String, String> c) {
+    separatedString.addAllStringMap(c);
+    return this;
+  }
+
   public Encoder addLine(String... strs) {
     separatedString.addLine(strs);
     return this;

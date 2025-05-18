@@ -30,15 +30,10 @@
  */
 package nz.co.gregs.separatedstring;
 
-import java.awt.Color;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import org.junit.Test;
@@ -307,7 +302,7 @@ public class DecoderTest {
     assertThat(decoder.decodeToMap("").isEmpty(), is(true));
     
     
-    final Map<String, Object> decodeToMap = decoder.decodeToMap(encoder.encode());
+    final Map<String, String> decodeToMap = decoder.decodeToMap(encoder.encode());
     
     assertThat(decodeToMap.size(), is(map.size()));
     for (Map.Entry<String, Object> entry : map.entrySet()) {

@@ -35,6 +35,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import org.junit.Test;
@@ -84,7 +85,8 @@ public class SeparatedStringBuilderTest {
     value = extrasEncoder.addAll(hashMap).encode();
     assertThat(value, is("third=1970-01-01 12:00;first=1;second=2"));
     extrasEncoder.removeAll(hashMap);
-    extrasEncoder.addAll(extrasEncoder.parseToMap(value));
+    Map<String, String> parsed = extrasEncoder.parseToMap(value);
+    extrasEncoder.addAllStringMap(parsed);
     assertThat(extrasEncoder.encode(), is("third=1970-01-01 12:00;first=1;second=2"));
     
 
@@ -109,7 +111,7 @@ public class SeparatedStringBuilderTest {
     value = extrasEncoder.addAll(hashMap,"=").encode();
     assertThat(value, is("third=1970-01-01 12:00;first=1;second=2"));
     extrasEncoder.removeAll(hashMap);
-    extrasEncoder.addAll(extrasEncoder.parseToMap(value));
+    extrasEncoder.addAllStringMap(extrasEncoder.parseToMap(value));
     assertThat(extrasEncoder.encode(), is("third=1970-01-01 12:00;first=1;second=2"));
     
 
