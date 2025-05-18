@@ -79,6 +79,62 @@ public class HTMLTableStringTest {
   }
   
   @Test
+  public void testIsEmpty(){
+    HTMLTableString table = new HTMLTableString();
+    assertThat(table.isEmpty(), is(true));
+    table.addLine("1",2,3,4);
+    assertThat(table.isEmpty(), is(false));
+    table.addLine("Alice",null,"Cindy","Dorothy");
+    assertThat(table.isEmpty(), is(false));
+    table.withNullsAs("[NULL]");
+    assertThat(table.isEmpty(), is(false));
+  }
+  
+  @Test
+  public void testIsNotEmpty(){
+    HTMLTableString table = new HTMLTableString();
+    assertThat(table.isNotEmpty(), is(false));
+    table.addLine("1",2,3,4);
+    assertThat(table.isNotEmpty(), is(true));
+    table.addLine("Alice",null,"Cindy","Dorothy");
+    assertThat(table.isNotEmpty(), is(true));
+    table.withNullsAs("[NULL]");
+    assertThat(table.isNotEmpty(), is(true));
+  }
+  
+  @Test
+  public void testRemoveAllStringArray(){
+    HTMLTableString table = new HTMLTableString();
+    assertThat(table.isNotEmpty(), is(false));
+    table.addLine("1",2,3,4);
+    assertThat(table.isNotEmpty(), is(true));
+    table.addLine("Alice",null,"Cindy","Dorothy");
+    assertThat(table.isNotEmpty(), is(true));
+    System.out.println(table.encode());
+    table.removeAll("1","2","3","4","5");
+    assertThat(table.isNotEmpty(), is(true));
+    System.out.println(table.encode());
+    table.removeAll("Alice","","Cindy","Dorothy");
+    assertThat(table.isNotEmpty(), is(false));
+  }
+  
+  @Test
+  public void testRemoveAllStringList(){
+    HTMLTableString table = new HTMLTableString();
+    assertThat(table.isNotEmpty(), is(false));
+    table.addLine("1",2,3,4);
+    assertThat(table.isNotEmpty(), is(true));
+    table.addLine("Alice",null,"Cindy","Dorothy");
+    assertThat(table.isNotEmpty(), is(true));
+    System.out.println(table.encode());
+    table.removeAll(List.of("1","2","3","4","5"));
+    assertThat(table.isNotEmpty(), is(true));
+    System.out.println(table.encode());
+    table.removeAll(List.of("Alice","","Cindy","Dorothy"));
+    assertThat(table.isNotEmpty(), is(false));
+  }
+  
+  @Test
   public void testFormatting(){
     String ukFormat = DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.FULL, FormatStyle.MEDIUM, Chronology.ofLocale(Locale.UK), Locale.UK);
     DateTimeFormatter formatDates = DateTimeFormatter.ofPattern(ukFormat).withZone(ZoneId.systemDefault());
