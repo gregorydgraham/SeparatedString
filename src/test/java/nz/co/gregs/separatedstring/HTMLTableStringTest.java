@@ -72,10 +72,25 @@ public class HTMLTableStringTest {
   public void testNullValue(){
     HTMLTableString table = new HTMLTableString();
     table.addLine("1",2,3,4);
-    table.addLine("Alice",null,"Cindy","Dorothy");
-    table.withNullsAs("[NULL]");
     String encode = table.encode();
+    assertThat(encode, is("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n</table>\n"));
+    table.addLine("Alice",null,"Cindy","Dorothy");
+    assertThat(table.getRetainNulls(), is(false));
+    assertThat(table.getNullRepresentation(), is("null"));
+
+    table.withNullsAs("[NULL]");
+    assertThat(table.getNullRepresentation(), is("[NULL]"));
+    assertThat(table.getRetainNulls(), is(true));
+
+    encode = table.encode();
     assertThat(encode, is("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n<tr><td>Alice</td><td>[NULL]</td><td>Cindy</td><td>Dorothy</td></tr>\n</table>\n"));
+
+    table.withNullsRetained(false);
+    assertThat(table.getNullRepresentation(), is("[NULL]"));
+    assertThat(table.getRetainNulls(), is(false));
+
+    encode = table.encode();
+    assertThat(encode, is("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n<tr><td>Alice</td><td></td><td>Cindy</td><td>Dorothy</td></tr>\n</table>\n"));
   }
   
   @Test
@@ -119,7 +134,7 @@ public class HTMLTableStringTest {
   }
   
   @Test
-  public void testRemoveAllStringList(){
+  public void testRemoveAllList(){
     HTMLTableString table = new HTMLTableString();
     assertThat(table.isNotEmpty(), is(false));
     table.addLine("1",2,3,4);

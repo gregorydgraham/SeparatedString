@@ -84,10 +84,6 @@ public class HTMLTableString {
     return htmlTableFormatter.removeAll(baddies);
   }
 
-  public SeparatedString removeAll(Map<String, Object> c) {
-    return htmlTableFormatter.removeAll(c);
-  }
-
   public SeparatedString addLine(String... strs) {
     return htmlTableFormatter.addLine(strs);
   }

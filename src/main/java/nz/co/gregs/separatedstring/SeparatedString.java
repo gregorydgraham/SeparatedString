@@ -513,11 +513,10 @@ public class SeparatedString {
           strings.remove(next);
         }
       } else {
-        if (baddies.contains(next.getValue())) {
+        final Object value = next.getValue();
+        if (value!=null && baddies.contains(value)) {
           strings.remove(next);
-        } else if (baddies.contains(next.getValue())) {
-          strings.remove(next);
-        } else if (baddies.contains(formatEntryValue(next.getValue()))) {
+        } else if (baddies.contains(formatEntryValue(value))) {
           strings.remove(next);
         }
       }

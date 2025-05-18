@@ -205,75 +205,55 @@
                 <!-- implementation is needed only for Maven 2 -->
                 <rule implementation="org.jacoco.maven.RuleConfiguration">
                   <element>METHOD</element>
-<!--                  <excludes>
-                    <exclude>*deprecated*</exclude>
-                    <exclude>*databases*</exclude>
-                    <exclude>*internal*</exclude>
-                    <exclude>*exceptions*</exclude>
-                    <exclude>*QueryGraphVisualisationTest</exclude>
-                    <exclude>*DBExtractor</exclude>
-                    <exclude>xFunc</exclude>
-                  </excludes>-->
+                  <excludes>
+                    <exclude>*SeparatedStringBuilder*</exclude>
+                  </excludes>
                   <limits><!-- implementation is needed only for Maven 2 -->
                     <limit implementation="org.jacoco.report.check.Limit">
                       <counter>INSTRUCTION</counter>
                       <value>COVEREDRATIO</value>
-                      <minimum>0.10</minimum>
+                      <minimum>0.50</minimum>
                     </limit>
                   </limits>
                 </rule>
                 <rule implementation="org.jacoco.maven.RuleConfiguration">
                   <element>CLASS</element>
-<!--                  <excludes>
-                    <exclude>*deprecated*</exclude>
-                    <exclude>*databases*</exclude>
-                    <exclude>*internal*</exclude>
-                    <exclude>*exceptions*</exclude>
-                    <exclude>*QueryGraphVisualisationTest</exclude>
-                    <exclude>*DBExtractor</exclude>
-                    <exclude>*DBByteArray</exclude> Deprecated class does not need testing 
-                  </excludes>-->
+                  <excludes>
+                    <exclude>*SeparatedStringBuilder*</exclude>
+                  </excludes>
                   <limits>
                     <limit>
                       <counter>LINE</counter>
                       <value>COVEREDRATIO</value>
-                      <minimum>0.23</minimum>
+                      <minimum>0.50</minimum>
                     </limit>
                   </limits>
                 </rule>
                 <!-- implementation is needed only for Maven 2 -->
                 <rule implementation="org.jacoco.maven.RuleConfiguration">
                   <element>PACKAGE</element>
-<!--                  <excludes>
-                    <exclude>*databases*</exclude>
-                    <exclude>*internal*</exclude>
-                    <exclude>*exceptions*</exclude>
-                    <exclude>*QueryGraphVisualisationTest</exclude>
-                    <exclude>*DBExtractor</exclude>
-                  </excludes>-->
+                  <excludes>
+                    <exclude>*SeparatedStringBuilder*</exclude>
+                  </excludes>
                   <limits><!-- implementation is needed only for Maven 2 -->
                     <limit implementation="org.jacoco.report.check.Limit">
                       <counter>INSTRUCTION</counter>
                       <value>COVEREDRATIO</value>
-                      <minimum>0.20</minimum>
+                      <minimum>0.50</minimum>
                     </limit>
                   </limits>
                 </rule>
                 <!-- implementation is needed only for Maven 2 -->
                 <rule implementation="org.jacoco.maven.RuleConfiguration">
                   <element>BUNDLE</element>
-<!--                  <excludes>
-                    <exclude>*databases*</exclude>
-                    <exclude>*internal*</exclude>
-                    <exclude>*exceptions*</exclude>
-                    <exclude>*QueryGraphVisualisationTest</exclude>
-                    <exclude>*DBExtractor</exclude>
-                  </excludes>-->
+                  <excludes>
+                    <exclude>*SeparatedStringBuilder*</exclude>
+                  </excludes>
                   <limits><!-- implementation is needed only for Maven 2 -->
                     <limit implementation="org.jacoco.report.check.Limit">
                       <counter>INSTRUCTION</counter>
                       <value>COVEREDRATIO</value>
-                      <minimum>0.10</minimum>
+                      <minimum>0.50</minimum>
                     </limit>
                   </limits>
                 </rule>

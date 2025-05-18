@@ -30,7 +30,6 @@
  */
 package nz.co.gregs.separatedstring;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +69,9 @@ public class SeparatedStringBuilder {
    * and is recommended.</p>
    *
    * @return a SeparatedString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString csv() {
     return SeparatedStringBuilder.byCommasWithQuotedTermsAndBackslashEscape().withKeyValueSeparator("=");
   }
@@ -83,7 +84,9 @@ public class SeparatedStringBuilder {
    * and is recommended.</p>
    *
    * @return a SeparatedString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString tsv() {
     return SeparatedStringBuilder.byTabs().withEachTermPrecededAndFollowedWith("\"").withEscapeChar("\\").withKeyValueSeparator("=");
   }
@@ -92,7 +95,9 @@ public class SeparatedStringBuilder {
    * Creates a SeparatedString with recommended values for creating an HTML ordered list.
    *
    * @return a SeparatedString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString htmlOrderedList() {
     return SeparatedStringBuilder.forSeparator("\n").withThisBeforeEachTerm("<li>").withThisAfterEachTerm("</li>").withPrefix("<ol>\n").withSuffix("\n</ol>\n");
   }
@@ -101,7 +106,9 @@ public class SeparatedStringBuilder {
    * Creates a SeparatedString with recommended values for creating an HTML unordered list.
    *
    * @return a SeparatedString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString htmlUnorderedList() {
     return SeparatedStringBuilder.forSeparator("\n").withThisBeforeEachTerm("<li>").withThisAfterEachTerm("</li>").withPrefix("<ul>\n").withSuffix("\n</ul>\n");
   }
@@ -115,7 +122,9 @@ public class SeparatedStringBuilder {
    *
    * @param precedingString the string to include at the very beginning of the generated separated string
    * @return a SeparatedString that will have precedingString at the beginning of the output
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString startsWith(String precedingString) {
     return new SeparatedString().withPrefix(precedingString);
   }
@@ -129,7 +138,9 @@ public class SeparatedStringBuilder {
    * @param nameValuePairs a collection of name/value pairs to be included in the separated string
    * @param nameValueSeparator the character (like "=" or ":") used to separate the name and value
    * @return a SeparatedString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString of(Map<String, Object> nameValuePairs, String nameValueSeparator) {
     return new SeparatedString().withKeyValueSeparator(nameValueSeparator).addAll(nameValuePairs);
   }
@@ -142,7 +153,9 @@ public class SeparatedStringBuilder {
    *
    * @param allStrings a list of strings to include within the separated string
    * @return SeparatedString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString of(String... allStrings) {
     return new SeparatedString().addAll(allStrings);
   }
@@ -155,7 +168,9 @@ public class SeparatedStringBuilder {
    *
    * @param allStrings a list of strings to include within the separated string
    * @return SeparatedString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString of(List<String> allStrings) {
     final SeparatedString separatedString = new SeparatedString();
     if (allStrings != null) {
@@ -173,7 +188,9 @@ public class SeparatedStringBuilder {
    *
    * @param separator the characters, like ", ", used to separate that values within the separated string
    * @return a SeparatedString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString forSeparator(String separator) {
     return new SeparatedString().separatedBy(separator);
   }
@@ -182,7 +199,9 @@ public class SeparatedStringBuilder {
    * Creates a SeparatedString that separates the values with a single space.
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString bySpaces() {
     return forSeparator(" ");
   }
@@ -191,7 +210,9 @@ public class SeparatedStringBuilder {
    * Creates a SeparatedString that separates the values with a single comma.
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString byCommas() {
     return forSeparator(",");
   }
@@ -200,7 +221,9 @@ public class SeparatedStringBuilder {
    * Creates a SeparatedString that separates the values with a comma and a single space.
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString byCommaSpace() {
     return forSeparator(", ");
   }
@@ -213,7 +236,9 @@ public class SeparatedStringBuilder {
    * This is a more robust SeparateString definition than byCommas().</p>
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString byCommasWithQuotedTermsAndBackslashEscape() {
     return byCommas()
             .withThisBeforeEachTerm("\"")
@@ -228,7 +253,9 @@ public class SeparatedStringBuilder {
    * This is a more robust SeparateString definition than byCommas().</p>
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString byCommasWithQuotedTermsAndDoubleBackslashEscape() {
     return byCommas()
             .withThisBeforeEachTerm("\"")
@@ -243,7 +270,9 @@ public class SeparatedStringBuilder {
    * You should probably use {@link #tsv() } instead as it produces more reliable encodings</p>
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString byTabs() {
     return forSeparator("\t");
   }
@@ -252,7 +281,9 @@ public class SeparatedStringBuilder {
    * Creates a SeparatedString that separates the values with a newline character.
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString byLines() {
     return forSeparator("\n");
   }
@@ -261,7 +292,9 @@ public class SeparatedStringBuilder {
    * Creates a SeparatedString that separates the values with a space.
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString spaceSeparated() {
     return bySpaces();
   }
@@ -273,7 +306,9 @@ public class SeparatedStringBuilder {
    * You should probably use {@link #csv() } instead as it produces more reliable encodings</p>
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString commaSeparated() {
     return byCommas();
   }
@@ -285,7 +320,9 @@ public class SeparatedStringBuilder {
    * You should probably use {@link #tsv() } instead as it produces more reliable encodings</p>
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString tabSeparated() {
     return byTabs();
   }
@@ -294,7 +331,9 @@ public class SeparatedStringBuilder {
    * Creates a SeparatedString that separates the values with a new line character.
    *
    * @return a SeparateString
+   * @deprecated use the {@link Builder } class instead
    */
+  @Deprecated
   public static SeparatedString lineSeparated() {
     return byLines();
   }
