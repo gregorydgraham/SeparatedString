@@ -64,6 +64,26 @@ public class SeparatedStringTest {
   }
 
   @Test
+  public void testHasSymetricWrapping() {
+    SeparatedString sepString = SeparatedStringBuilder.byCommas().withEachTermWrappedWith("'", "'");
+    assertThat(sepString.hasSymetricWrapping(), is(true)); 
+    sepString = sepString.withEachTermWrappedWith("'", "~");
+    assertThat(sepString.hasSymetricWrapping(), is(false)); 
+    sepString = sepString.withThisBeforeEachTerm("~");
+    assertThat(sepString.hasSymetricWrapping(), is(true)); 
+  }
+
+  @Test
+  public void testHasAsymetricWrapping() {
+    SeparatedString sepString = SeparatedStringBuilder.byCommas().withEachTermWrappedWith("'", "'");
+    assertThat(sepString.hasAsymetricWrapping(), is(false)); 
+    sepString = sepString.withEachTermWrappedWith("'", "~");
+    assertThat(sepString.hasAsymetricWrapping(), is(true)); 
+    sepString = sepString.withThisBeforeEachTerm("~");
+    assertThat(sepString.hasAsymetricWrapping(), is(false)); 
+  }
+
+  @Test
   public void testSimpleDateFormatting() {
     SeparatedString sepString = new SeparatedString().separatedBy(", ");
     sepString.setFormatFor(Instant.class, (Instant d) -> {
