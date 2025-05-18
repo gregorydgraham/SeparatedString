@@ -1348,15 +1348,22 @@ public class SeparatedString {
   }
 
   /**
-   * Checks whether the prefix and suffix are the same.
+   * Checks whether the wrapBefore and wrapAfter are the same.
    *
    * <p>
    * If they're both empty, this will return TRUE.</p>
    *
-   * @return TRUE if the suffix and prefix are the same.
+   * @return TRUE if the wrapBefore and wrapAfter are the same.
    */
   public boolean hasSymetricWrapping() {
-    return prefix != null && prefix.equals(suffix);
+    final boolean wrapBeforeIsNull = (wrapBefore == null);
+    if (wrapBeforeIsNull && wrapAfter == null) {
+      return true;
+    } else if (wrapBeforeIsNull) {
+      return false;
+    } else {
+      return wrapBefore.equals(wrapAfter);
+    }
   }
 
   /**
@@ -1368,7 +1375,8 @@ public class SeparatedString {
    * @return TRUE if the suffix and prefix have different values.
    */
   public boolean hasAsymetricWrapping() {
-    return !hasSymetricWrapping();
+    final boolean hasSymetricWrapping = hasSymetricWrapping();
+    return !hasSymetricWrapping;
   }
 
   /**
