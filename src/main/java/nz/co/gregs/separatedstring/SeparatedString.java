@@ -295,14 +295,14 @@ public class SeparatedString {
       String firstEntry = null;
       for (StringEntry entry : allTheEntries) {
         // Handle the 2 special cases first
-        if (entry.isEndOfLineMarker()) {
+        if (StringEntry.isEndOfLineMarker(entry)) {
           // END OF LINE
           // Append the line ending to the ultimate result
           strs.append(getLineEnd());
           // blank the separator because we're starting a new line
           sep = "";
           // and reloop
-        } else if (entry.isStartOfLineMarker()) {
+        } else if (StringEntry.isStartOfLineMarker(entry)) {
           // START OF LINE
           // Append the line starter to the ultimate result
           strs.append(getLineStart());
@@ -347,12 +347,15 @@ public class SeparatedString {
 
   private String formatStringEntry(StringEntry element) {
     StringBuilder build = new StringBuilder();
-    if (element.hasKey()) {
-      build.append(replaceSequencesInString(element.getKey(), getReplacementSequences()));
-      build.append(getKeyValueSeparator());
+    if (element != null) {
+      if (element.hasKey()) {
+        build.append(replaceSequencesInString(element.getKey(), getReplacementSequences()));
+        build.append(getKeyValueSeparator());
+      }
+      build.append(formatEntryValue(element.getValue()));
+    } else {
+      build.append(formatEntryValue(element));
     }
-    build.append(formatEntryValue(element.getValue()));
-
     return build.toString();
   }
 
@@ -773,7 +776,11 @@ public class SeparatedString {
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
   public SeparatedString add(String string) {
-    strings.add(StringEntry.of(string));
+    if (string == null) {
+      strings.add(null);
+    } else {
+      strings.add(StringEntry.of(string));
+    }
     return this;
   }
 

@@ -30,7 +30,6 @@
  */
 package nz.co.gregs.separatedstring;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -52,14 +51,6 @@ public class HTMLTableString {
           .withThisAfterEachTerm("</td>")
           .withPrefix("<table>\n")
           .withSuffix("</table>\n");
-
-  public boolean isTrimBlanks() {
-    return htmlTableFormatter.isTrimBlanks();
-  }
-
-  public SeparatedString withEscapeChar(String esc) {
-    return htmlTableFormatter.withEscapeChar(esc);
-  }
 
   public String encode() {
     return htmlTableFormatter.encode();

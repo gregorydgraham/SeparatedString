@@ -63,6 +63,27 @@ public class SeparatedStringTest {
     assertThat(parsed[2], is("ccc"));
   }
 
+
+  @Test
+  public void testAddObject() {
+    final SeparatedString sepString = SeparatedStringBuilder.byCommas();
+    sepString.add(1);
+    sepString.add(null);
+    sepString.add((String)null);
+    sepString.add((Object)null);
+    sepString.add(2.2);
+    final String encoded = sepString.toString();
+    assertThat(encoded, is("1,,,,2.2"));
+
+    String[] parsed = sepString.parseToArray(encoded);
+    assertThat(parsed.length, is(5));
+    assertThat(parsed[0], is("1"));
+    assertThat(parsed[1], is(""));
+    assertThat(parsed[2], is(""));
+    assertThat(parsed[3], is(""));
+    assertThat(parsed[4], is("2.2"));
+  }
+
   @Test
   public void testHasSymetricWrapping() {
     SeparatedString sepString = SeparatedStringBuilder.byCommas().withEachTermWrappedWith("'", "'");
@@ -70,6 +91,10 @@ public class SeparatedStringTest {
     sepString = sepString.withEachTermWrappedWith("'", "~");
     assertThat(sepString.hasSymetricWrapping(), is(false)); 
     sepString = sepString.withThisBeforeEachTerm("~");
+    assertThat(sepString.hasSymetricWrapping(), is(true)); 
+    sepString = sepString.withThisBeforeEachTerm(null);
+    assertThat(sepString.hasSymetricWrapping(), is(false)); 
+    sepString = sepString.withThisAfterEachTerm(null);
     assertThat(sepString.hasSymetricWrapping(), is(true)); 
   }
 
@@ -80,6 +105,10 @@ public class SeparatedStringTest {
     sepString = sepString.withEachTermWrappedWith("'", "~");
     assertThat(sepString.hasAsymetricWrapping(), is(true)); 
     sepString = sepString.withThisBeforeEachTerm("~");
+    assertThat(sepString.hasAsymetricWrapping(), is(false)); 
+    sepString = sepString.withThisBeforeEachTerm(null);
+    assertThat(sepString.hasAsymetricWrapping(), is(true)); 
+    sepString = sepString.withThisAfterEachTerm(null);
     assertThat(sepString.hasAsymetricWrapping(), is(false)); 
   }
 

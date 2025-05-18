@@ -84,12 +84,18 @@ public class StringEntry {
     return entry;
   }
 
-  public boolean isEndOfLineMarker() {
-    return StringEntry.END_OF_LINE_MARKER.equals(this);
+  public static boolean isEndOfLineMarker(StringEntry isit) {
+    if (isit == null) {
+      return false;
+    }
+    return StringEntry.END_OF_LINE_MARKER.equals(isit);
   }
 
-  public boolean isStartOfLineMarker() {
-    return StringEntry.START_OF_LINE_MARKER.equals(this);
+  public static boolean isStartOfLineMarker(StringEntry isit) {
+    if (isit == null) {
+      return false;
+    }
+    return StringEntry.START_OF_LINE_MARKER.equals(isit);
   }
 
 }
