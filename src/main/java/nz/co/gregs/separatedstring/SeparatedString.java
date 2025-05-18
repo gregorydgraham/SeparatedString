@@ -80,6 +80,32 @@ public class SeparatedString {
   private String lineEnd = "";
   private String lineStart = "";
 
+  private static SeparatedString duplicateSettingsOf(SeparatedString sepString) {
+    SeparatedString newVersion = new SeparatedString();
+    for (StringEntry entry : sepString.strings) {
+        newVersion.strings.add(StringEntry.of(entry));
+    }
+    for (Map.Entry<Class<?>, Function<?, String>> entry : sepString.formatters.entrySet()) {
+      newVersion.formatters.put(entry.getKey(), entry.getValue());
+    }
+    newVersion.separator = sepString.separator;
+    newVersion.prefix = sepString.prefix;
+    newVersion.suffix = sepString.suffix;
+    newVersion.wrapBefore = sepString.wrapBefore;
+    newVersion.wrapAfter = sepString.wrapAfter;
+    newVersion.escapeChar = sepString.escapeChar;
+    newVersion.useWhenEmpty = sepString.useWhenEmpty;
+    newVersion.keyValueSeparator = sepString.keyValueSeparator;
+    newVersion.closedLoop = sepString.closedLoop;
+    newVersion.trimBlanks = sepString.trimBlanks;
+    newVersion.retainNulls = sepString.retainNulls;
+    newVersion.retainNullString = sepString.getNullRepresentation();
+    newVersion.uniqueValuesOnly = sepString.isUniqueValuesOnly();
+    newVersion.lineEnd = sepString.lineEnd;
+    newVersion.lineStart = sepString.lineStart;
+    return newVersion;
+  }
+  
   public enum ClosedLoop {
     Closed, Open, NotLoop;
 
@@ -233,23 +259,6 @@ public class SeparatedString {
    * Encodes the provided Objects as per the setup of the SeparatedString.
    *
    * <p>
-   * for instance a {@code SeparatedString.commaSeparated().encode("1", 2, "3")} will return "1,2,3".</p>
-   *
-   * <p>
-   * No values are added to this SeparatedString and no values within this SeparatedString are useds in the encoding</p>
-   *
-   * @param strs the Strings to be encoded as separated string
-   * @return returns the SeparatedString's contents encoded as a String
-   */
-//  public String encode(String... strs) {
-//    SeparatedString newVersion = duplicateSettingsOf(this);
-//    String encode = newVersion.addAll(strs).encode();
-//    return encode;
-//  }
-  /**
-   * Encodes the provided Objects as per the setup of the SeparatedString.
-   *
-   * <p>
    * for instance a {@code SeparatedString.commaSeparated().encode("1",2,"3")} will return "1,2,3".</p>
    *
    * <p>
@@ -285,30 +294,45 @@ public class SeparatedString {
       String currentEntry = "";
       String firstEntry = null;
       for (StringEntry entry : allTheEntries) {
-        String entryString = formatStringEntry(entry);
-        if (trimBlanks && entryString.isEmpty()) {
+        // Handle the 2 special cases first
+        if (entry.isEndOfLineMarker()) {
+          // END OF LINE
+          // Append the line ending to the ultimate result
+          strs.append(getLineEnd());
+          // blank the separator because we're starting a new line
+          sep = "";
+          // and reloop
+        } else if (entry.isStartOfLineMarker()) {
+          // START OF LINE
+          // Append the line starter to the ultimate result
+          strs.append(getLineStart());
+          // blank the separator because we're starting a new line
+          sep = "";
         } else {
-          if (entry.isEndOfLineMarker()) {
-            strs.append(getLineEnd());
-            sep = "";
-          } else if (entry.isStartOfLineMarker()) {
-            strs.append(getLineStart());
-            sep = "";
-          } else {
+          // now get the formatted value
+          String entryString = formatStringEntry(entry);
+          if (trimBlanks && entryString.isEmpty()) {
+            // if it's empty and we're trimming blanks we don't need to handle the value any further
+          }
             if (isUniqueValuesOnly() && previousElements.contains(entryString)) {
+              // this has already occurred so skip to the next loop
               break;
             } else {
+              // in all other cases store the value for future reference
               previousElements.add(entryString);
             }
+            // Apply wrapping
             currentEntry = getWrapBefore() + entryString + getWrapAfter();
+            // Store the first entry for use with looping
             if (firstEntry == null) {
               firstEntry = currentEntry;
             }
+            // Append the separator (which may be blank) and the wrapped value to the ultimate result
             strs.append(sep).append(currentEntry);
             sep = this.getSeparator();
-          }
         }
       }
+
       if (ClosedLoop.isClosed(this.closedLoop) && firstEntry != null && !firstEntry.equals(currentEntry)) {
         strs.append(sep).append(firstEntry);
       }
@@ -320,6 +344,8 @@ public class SeparatedString {
       return getPrefix() + infix + getSuffix();
     }
   }
+
+  
 
   private String formatStringEntry(StringEntry element) {
     StringBuilder build = new StringBuilder();
@@ -354,24 +380,28 @@ public class SeparatedString {
   }
 
   private <T> String format(T object) {
+    String result;
     if (object == null) {
       // there is no object so just report it as empty or null
       if (getRetainNulls()) {
         // null needs to be reported as null
-        return getNullRepresentation();
+        result = getNullRepresentation();
       } else {
         // the default is to report it as empty
-        return this.getEmptyValue();
+        result = this.getEmptyValue();
+      }
+    } else {
+      // look for a formatter
+      Function<T, String> formatter = getFormatterFor(object);
+      if (formatter != null) {
+        // apply the formatter and return the result
+        result = formatter.apply(object);
+      } else {
+        // no formatter so return the default encoding
+        result = object.toString();
       }
     }
-    // look for a formatter
-    Function<T, String> formatter = getFormatterFor(object);
-    if (formatter != null) {
-      // apply the formatter and return the result
-      return formatter.apply(object);
-    }
-    // no formatter so return the default encoding
-    return object.toString();
+    return result;
   }
 
   protected <T> Function<T, String> getFormatterFor(T object) {
@@ -1063,7 +1093,7 @@ public class SeparatedString {
    * @return a list of values as defined by the string and the settings of this SeparatedString
    */
   public List<String> parseToList(String input) {
-    return parse(input).values;
+    return parse(input).getValues();
   }
 
   /**
@@ -1074,7 +1104,7 @@ public class SeparatedString {
    * @return a list of values as defined by the string and the settings of this SeparatedString
    */
   public List<List<String>> parseToLines(String input) {
-    return parse(input).lines;
+    return parse(input).getLines();
   }
 
   private synchronized ParseResults parse(String input) {
@@ -1108,7 +1138,7 @@ public class SeparatedString {
     final String quoteEnd = getWrapAfter();
     boolean quotesAreEqual = quoteStart.equals(quoteEnd);
     final String separatorString = getSeparator();
-    final String lineEndString = lineEnd;
+    final String lineEndString = getLineEnd();
     // loop through all the characters
     int i = 0;
     while (i < line.length()) {
@@ -1148,7 +1178,7 @@ public class SeparatedString {
         }
         if (separatorString.length() == 0) {
           // When there is no separator we need to add the value to the list
-          checkUniquenessRequirementsAndAdd(results.values, format(val), previousElements, currentLine);
+          checkUniquenessRequirementsAndAdd(results.getValues(), format(val), previousElements, currentLine);
           // and clear the val
           val = new StringBuilder();
         }
@@ -1163,12 +1193,12 @@ public class SeparatedString {
           // but in an unquoted value it is the end of the value
           isInValue = false;
           // and we need to add the value to the list
-          checkUniquenessRequirementsAndAdd(results.values, format(val), previousElements, currentLine);
+          checkUniquenessRequirementsAndAdd(results.getValues(), format(val), previousElements, currentLine);
           // and clear the val
           val = new StringBuilder();
         } else {
           // edge case: we're not in a value but we found a comma so its an empty value
-          checkUniquenessRequirementsAndAdd(results.values, "", previousElements, currentLine);
+          checkUniquenessRequirementsAndAdd(results.getValues(), "", previousElements, currentLine);
         }
         // Move past the separator but remember we'll increment at the end of the loop
         i = i + separatorString.length() - 1;
@@ -1176,11 +1206,11 @@ public class SeparatedString {
         // we have found a new line
         isInValue = false;
         // and we need to add the value to the list
-        checkUniquenessRequirementsAndAdd(results.values, format(val), previousElements, currentLine);
+        checkUniquenessRequirementsAndAdd(results.getValues(), format(val), previousElements, currentLine);
         // and clear the val
         val = new StringBuilder();
         // add the completed line
-        results.lines.add(currentLine);
+        results.getLines().add(currentLine);
         // and make a new blank currentLine
         currentLine = new ArrayList<>(0);
         // Move past the newline but remember we'll increment at the end of the loop
@@ -1201,17 +1231,25 @@ public class SeparatedString {
     }
     // The last value doesn't have a terminator so we'll need to add it as well
     // Note that this means all lines have at least one value even when they're empty
-    checkUniquenessRequirementsAndAdd(results.values, format(val), previousElements, currentLine);
+    checkUniquenessRequirementsAndAdd(results.getValues(), format(val), previousElements, currentLine);
     // add the completed line
-    results.lines.add(currentLine);
+    results.getLines().add(currentLine);
     return results;
 
   }
 
   private class ParseResults {
 
-    List<List<String>> lines = new ArrayList<>();
-    List<String> values = new ArrayList<>();
+    private final List<List<String>> lines = new ArrayList<>();
+    private final List<String> values = new ArrayList<>();
+
+    public List<List<String>> getLines() {
+      return lines;
+    }
+
+    public List<String> getValues() {
+      return values;
+    }
   }
 
   private void checkUniquenessRequirementsAndAdd(List<String> list, String candidate, Set<String> previousEntries, List<String> currentLine) {
@@ -1382,23 +1420,6 @@ public class SeparatedString {
    */
   public boolean isRetainingNulls() {
     return retainNulls;
-  }
-
-  private static SeparatedString duplicateSettingsOf(SeparatedString sepString) {
-    SeparatedString newVersion = new SeparatedString();
-    newVersion.separator = sepString.separator;
-    newVersion.prefix = sepString.prefix;
-    newVersion.suffix = sepString.suffix;
-    newVersion.wrapBefore = sepString.wrapBefore;
-    newVersion.wrapAfter = sepString.wrapAfter;
-    newVersion.escapeChar = sepString.escapeChar;
-    newVersion.useWhenEmpty = sepString.useWhenEmpty;
-    newVersion.keyValueSeparator = sepString.keyValueSeparator;
-    newVersion.closedLoop = sepString.closedLoop;
-    newVersion.trimBlanks = sepString.trimBlanks;
-    newVersion.retainNulls = sepString.retainNulls;
-    newVersion.uniqueValuesOnly = sepString.isUniqueValuesOnly();
-    return newVersion;
   }
 
   protected String getLineEnd() {

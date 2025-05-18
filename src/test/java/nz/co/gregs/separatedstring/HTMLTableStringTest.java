@@ -56,7 +56,6 @@ public class HTMLTableStringTest {
     HTMLTableString table = new HTMLTableString();
     table.addLine("1",2,3,4);
     String encode = table.encode();
-    System.out.println("ENCODE: "+encode);
     assertThat(encode, is("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n</table>\n"));
   }
   
@@ -66,7 +65,6 @@ public class HTMLTableStringTest {
     table.addLine();
     table.addLine("1",2,3,4);
     String encode = table.encode();
-    System.out.println("ENCODE: "+encode);
     assertThat(encode, is("<table>\n<tr></tr>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n</table>\n"));
   }
   
@@ -77,7 +75,6 @@ public class HTMLTableStringTest {
     table.addLine("Alice",null,"Cindy","Dorothy");
     table.withNullsAs("[NULL]");
     String encode = table.encode();
-    System.out.println("ENCODE: "+encode);
     assertThat(encode, is("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n<tr><td>Alice</td><td>[NULL]</td><td>Cindy</td><td>Dorothy</td></tr>\n</table>\n"));
   }
   
@@ -91,8 +88,6 @@ public class HTMLTableStringTest {
     table.setFormatFor(Instant.class, (date)->formatDates.format(date));
     table.addLine(instant,5,6,7);
     String encode = table.encode();
-    System.out.println("ENCODE: "+encode);
-//    System.out.println("EXPECT: <table>\n<tr><td>"+formatDates.format(instant)+"</td><td>5</td><td>6</td><td>7</td></td>\n</table>\n");
     assertThat(encode, is("<table>\n<tr><td>"+formatDates.format(instant)+"</td><td>5</td><td>6</td><td>7</td></tr>\n</table>\n"));
   }
   
@@ -106,7 +101,6 @@ public class HTMLTableStringTest {
     table.addLine(values2);
     table.withNullsAs("[NULL]");
     String encode = table.encode();
-    System.out.println("ENCODE: "+encode);
     assertThat(encode, is("<table>\n<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>\n<tr><td>Alice</td><td>[NULL]</td><td>Cindy</td><td>Dorothy</td></tr>\n</table>\n"));
     List<List<String>> lines = table.parseToLines(encode);
     for (int i = 0; i < values.length; i++) {

@@ -72,7 +72,6 @@ public class SeparatedStringTest {
     sepString.addAll(List.of("alpha", Instant.ofEpochMilli(0l), "beta"));
     String result = sepString.encode();
 
-    System.out.println("RESULT: " + result);
     assertThat(result, is("alpha, 1970/01/01, beta"));
   }
 
@@ -311,7 +310,7 @@ public class SeparatedStringTest {
     String[] parsed = SeparatedStringBuilder
             .byCommasWithQuotedTermsAndBackslashEscape()
             .parseToArray("1000,117090058,117970084,\"170,9 + 58\",\"179,7 + 84\",\"Flensburg Weiche, W 203 - Flensburg Grenze\",Flensburg-Weiche - Flensb. Gr");
-//		Arrays.asList(parsed).stream().forEach((x) -> System.out.println(x));
+
     assertThat(parsed.length, is(7));
     assertThat(parsed[0], is("1000"));
     assertThat(parsed[1], is("117090058"));
@@ -335,7 +334,7 @@ public class SeparatedStringTest {
     assertThat(encoded, is("~\"1000\"~\t~\"117090058\"~\t~\"117970084\"~\t~\"170,9 + 58\"~\t~\"179,7 + 84\"~\t~\"Flensburg Weiche, W 203 - Flensburg Grenze\"~\t~\"Flensburg-Weiche - Flensb. Gr\"~\t~\"Albert \"The Pain\" Hallsburg\"~"));
 
     String[] parsed = sepString.parseToArray(encoded);
-//		Arrays.asList(parsed).stream().forEach((x) -> System.out.println(x));
+    
     assertThat(parsed.length, is(8));
     assertThat(parsed[0], is("1000"));
     assertThat(parsed[1], is("117090058"));
@@ -403,7 +402,6 @@ public class SeparatedStringTest {
     Looper looper = Looper.loopUntilLimit(parsed.length);
     looper.loop(
             (in) -> {
-              System.out.println((in.index())+" |parsed: "+parsed[in.index()]+" || "+values[in.index()]+" : values");
               assertThat(parsed[in.index()], is(values[in.index()]));
             });
   }
@@ -421,7 +419,6 @@ public class SeparatedStringTest {
     assertThat(encoded, is("+1000+\t+117090058+\t+117970084+\t+170,9 ||+ 58+\t+179,7 ||+ 84+\t+Flensburg Weiche, W 203 - Flensburg Grenze+\t+Flensburg-Weiche - Flensb. Gr+\t+Albert \"The Pain\" Hallsburg+"));
 
     String[] parsed = sepString.parseToArray(encoded);
-//		Arrays.asList(parsed).stream().forEach((x) -> System.out.println(x));
     assertThat(parsed.length, is(8));
     assertThat(parsed[0], is("1000"));
     assertThat(parsed[1], is("117090058"));
@@ -448,7 +445,6 @@ public class SeparatedStringTest {
     assertThat(encoded, is("START~\"1000\"~\t~\"117090058==~\"\"~\t~\"117970084\"~\t~\"170,9 + 58\"~\t~\"179,7 + 84\"~\t~\"Flensburg Weiche, W 203 - Flensburg Grenze\"~\t~\"Flensburg-Weiche - Flensb. Gr\"~\t~\"Albert \"The Pain\" Hallsburg\"~END"));
 
     String[] parsed = sepString.parseToArray(encoded);
-//		Arrays.asList(parsed).stream().forEach((x) -> System.out.println(x));
     assertThat(parsed.length, is(8));
     assertThat(parsed[0], is("1000"));
     assertThat(parsed[1], is("117090058~\""));

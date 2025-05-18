@@ -46,30 +46,34 @@ public class Decoder {
   }
 
   public Builder builder() {
-    return new Builder(separatedString);
+    return new Builder(SeparatedString.copy(separatedString));
   }
 
   public Encoder encoder() {
-    return new Encoder(separatedString);
+    return new Encoder(SeparatedString.copy(separatedString));
   }
 
   public List<String> decode(String str) {
     return separatedString.decode(str);
   }
 
-  public List<String> parseToList(String input) {
+  public List<String> decodeToList(String input) {
     return separatedString.parseToList(input);
   }
 
-  public List<List<String>> parseToLines(String input) {
+  public List<List<String>> decodeToLines(String input) {
     return separatedString.parseToLines(input);
   }
 
-  public String[] parseToArray(String input) {
+  public String[] decodeToArray(String input) {
     return separatedString.parseToArray(input);
   }
 
-  public Map<String, Object> parseToMap(String input) {
+  public Map<String, Object> decodeToMap(String input) {
     return separatedString.parseToMap(input);
+  }
+
+  protected SeparatedString getSeparatedString() {
+    return separatedString;
   }
 }

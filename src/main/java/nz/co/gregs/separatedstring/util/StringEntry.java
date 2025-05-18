@@ -47,6 +47,14 @@ public class StringEntry {
     return new StringEntry(key, value);
   }
 
+  public static StringEntry of(StringEntry value) {
+    if (value.hasKey()) {
+      return new StringEntry(value.getKey(), value.getValue());
+    } else {
+      return new StringEntry(value.getValue());
+    }
+  }
+
   public static StringEntry getEndOfLineMarker() {
     return END_OF_LINE_MARKER;
   }

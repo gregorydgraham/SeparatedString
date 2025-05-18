@@ -65,7 +65,7 @@ public class IntegrationTesting {
     assertThat(encoded, is("START~\"1000\"~\t~\"117090058==~\"\"~\t~\"117970084\"~\t~\"170,9 + 58\"~\t~\"179,7 + 84\"~\t~\"Flensburg Weiche, W 203 - Flensburg Grenze\"~\t~\"Flensburg-Weiche - Flensb. Gr\"~\t~\"Albert \"The Pain\" Hallsburg\"~END"));
 
     String[] parsed = sepString.parseToArray(encoded);
-//		Arrays.asList(parsed).stream().forEach((x) -> System.out.println(x));
+    
     assertThat(parsed.length, is(8));
     assertThat(parsed[0], is("1000"));
     assertThat(parsed[1], is("117090058~\""));
@@ -92,8 +92,8 @@ public class IntegrationTesting {
     final String encoded = encoder.encode();
     assertThat(encoded, is("START~\"1000\"~\t~\"117090058==~\"\"~\t~\"117970084\"~\t~\"170,9 + 58\"~\t~\"179,7 + 84\"~\t~\"Flensburg Weiche, W 203 - Flensburg Grenze\"~\t~\"Flensburg-Weiche - Flensb. Gr\"~\t~\"Albert \"The Pain\" Hallsburg\"~END"));
 
-    String[] parsed = decoder.parseToArray(encoded);
-//		Arrays.asList(parsed).stream().forEach((x) -> System.out.println(x));
+    String[] parsed = decoder.decodeToArray(encoded);
+
     assertThat(parsed.length, is(8));
     assertThat(parsed[0], is("1000"));
     assertThat(parsed[1], is("117090058~\""));

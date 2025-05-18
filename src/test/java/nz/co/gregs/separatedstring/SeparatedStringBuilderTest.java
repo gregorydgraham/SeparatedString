@@ -54,8 +54,6 @@ public class SeparatedStringBuilderTest {
     sep.add(1);
     sep.addAll("2", "3", "More");
     String encoded = sep.encode();
-    System.out.println(encoded);
-    System.out.println("<ol>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ol>\n");
     assertThat(encoded, is("<ol>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ol>\n"));
   }
 
@@ -65,8 +63,6 @@ public class SeparatedStringBuilderTest {
     sep.add(1);
     sep.addAll("2", "3", "More");
     String encoded = sep.encode();
-    System.out.println(encoded);
-    System.out.println("<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ul>\n");
     assertThat(encoded, is("<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>More</li>\n</ul>\n"));
   }
 
