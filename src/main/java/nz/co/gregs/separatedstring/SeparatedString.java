@@ -83,7 +83,7 @@ public class SeparatedString {
   private static SeparatedString duplicateSettingsOf(SeparatedString sepString) {
     SeparatedString newVersion = new SeparatedString();
     for (StringEntry entry : sepString.strings) {
-        newVersion.strings.add(StringEntry.of(entry));
+      newVersion.strings.add(StringEntry.of(entry));
     }
     for (Map.Entry<Class<?>, Function<?, String>> entry : sepString.formatters.entrySet()) {
       newVersion.formatters.put(entry.getKey(), entry.getValue());
@@ -105,7 +105,7 @@ public class SeparatedString {
     newVersion.lineStart = sepString.lineStart;
     return newVersion;
   }
-  
+
   public enum ClosedLoop {
     Closed, Open, NotLoop;
 
@@ -314,22 +314,22 @@ public class SeparatedString {
           if (trimBlanks && entryString.isEmpty()) {
             // if it's empty and we're trimming blanks we don't need to handle the value any further
           }
-            if (isUniqueValuesOnly() && previousElements.contains(entryString)) {
-              // this has already occurred so skip to the next loop
-              break;
-            } else {
-              // in all other cases store the value for future reference
-              previousElements.add(entryString);
-            }
-            // Apply wrapping
-            currentEntry = getWrapBefore() + entryString + getWrapAfter();
-            // Store the first entry for use with looping
-            if (firstEntry == null) {
-              firstEntry = currentEntry;
-            }
-            // Append the separator (which may be blank) and the wrapped value to the ultimate result
-            strs.append(sep).append(currentEntry);
-            sep = this.getSeparator();
+          if (isUniqueValuesOnly() && previousElements.contains(entryString)) {
+            // this has already occurred so skip to the next loop
+            break;
+          } else {
+            // in all other cases store the value for future reference
+            previousElements.add(entryString);
+          }
+          // Apply wrapping
+          currentEntry = getWrapBefore() + entryString + getWrapAfter();
+          // Store the first entry for use with looping
+          if (firstEntry == null) {
+            firstEntry = currentEntry;
+          }
+          // Append the separator (which may be blank) and the wrapped value to the ultimate result
+          strs.append(sep).append(currentEntry);
+          sep = this.getSeparator();
         }
       }
 
@@ -344,8 +344,6 @@ public class SeparatedString {
       return getPrefix() + infix + getSuffix();
     }
   }
-
-  
 
   private String formatStringEntry(StringEntry element) {
     StringBuilder build = new StringBuilder();
@@ -615,7 +613,9 @@ public class SeparatedString {
    * @param c a map of objects
    * @param keyValueSeparator the key/value separator to use during processing (overrides any previous key/value separator)
    * @return this SeparatedString
+   * @deprecated use {@link #withKeyValueSeparator(java.lang.String)} to set the key/value separator
    */
+  @Deprecated
   public SeparatedString addAll(Map<String, Object> c, String keyValueSeparator) {
     withKeyValueSeparator(keyValueSeparator);
     addAll(c);
@@ -791,17 +791,6 @@ public class SeparatedString {
       strings.add(StringEntry.of(string.toString()));
     }
     return this;
-  }
-
-  /**
-   * Inserts the specified elements into the list of known values.
-   *
-   * @param strings elements to be inserted
-   * @return this
-   * @throws IndexOutOfBoundsException {@inheritDoc}
-   */
-  public SeparatedString containing(String... strings) {
-    return addAll(strings);
   }
 
   /**

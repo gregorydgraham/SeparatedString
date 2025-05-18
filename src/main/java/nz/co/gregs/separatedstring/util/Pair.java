@@ -12,7 +12,7 @@ package nz.co.gregs.separatedstring.util;
  * @param <KEY> the type of the key
  * @param <VALUE> the type of the value
  */
-public class Pair<KEY, VALUE> implements Comparable<KEY> {
+public class Pair<KEY, VALUE> {
 
 	private final KEY key;
 	private final VALUE value;
@@ -59,11 +59,6 @@ public class Pair<KEY, VALUE> implements Comparable<KEY> {
 	 */
 	public VALUE getValue() {
 		return value;
-	}
-
-	@Override
-	public int compareTo(KEY o) {
-		return key.toString().compareTo(o.toString());
 	}
 
 }

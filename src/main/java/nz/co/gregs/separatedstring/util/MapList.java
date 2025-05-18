@@ -23,23 +23,6 @@ public class MapList<KEY, VALUE> extends ArrayList<Pair<KEY, VALUE>> {
 	/**
 	 * Creates a new list that can store key/value pairs.
 	 *
-	 */
-	public MapList() {
-		super();
-	}
-
-	/**
-	 * Creates a new list that can store key/value pairs.
-	 *
-	 * @param c a collection of key/value pairs
-	 */
-	public MapList(Collection<? extends Pair<KEY, VALUE>> c) {
-		super(c);
-	}
-
-	/**
-	 * Creates a new list that can store key/value pairs.
-	 *
 	 * @param initialCapacity the initial capacity of the MapList
 	 */
 	public MapList(int initialCapacity) {

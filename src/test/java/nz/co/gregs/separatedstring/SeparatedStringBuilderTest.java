@@ -91,6 +91,29 @@ public class SeparatedStringBuilderTest {
   }
   private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
+
+  @Test
+  public void testMapEncodingWithIncludedKeyValueSeparator() {
+
+    SeparatedString extrasEncoder = SeparatedStringBuilder
+            .forSeparator(";")
+            .setFormatFor(Instant.class, d -> DATETIME_FORMAT.format(d))
+            .withEscapeChar("!");
+    
+    String value = extrasEncoder.addAll(new HashMap<>(0)).encode();
+    assertThat(value, is(""));
+    final HashMap<String, Object> hashMap = new HashMap<>(0);
+    hashMap.put("first", "1");
+    hashMap.put("second", 2);
+    hashMap.put("third", Instant.ofEpochMilli(0l));
+    value = extrasEncoder.addAll(hashMap,"=").encode();
+    assertThat(value, is("third=1970-01-01 12:00;first=1;second=2"));
+    extrasEncoder.removeAll(hashMap);
+    extrasEncoder.addAll(extrasEncoder.parseToMap(value));
+    assertThat(extrasEncoder.encode(), is("third=1970-01-01 12:00;first=1;second=2"));
+    
+
+  }
   @Test
   public void testEncodingStressTest() {
     SeparatedString clusterHostEncoder = SeparatedStringBuilder
