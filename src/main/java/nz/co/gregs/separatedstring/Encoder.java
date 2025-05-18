@@ -48,11 +48,11 @@ public class Encoder {
   }
 
   public Builder builder() {
-    return new Builder(separatedString);
+    return new Builder(SeparatedString.copy(separatedString));
   }
 
   public Decoder decoder() {
-    return new Decoder(separatedString);
+    return new Decoder(SeparatedString.copy(separatedString));
   }
 
   public String encode() {
