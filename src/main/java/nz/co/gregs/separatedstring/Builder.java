@@ -71,11 +71,11 @@ public class Builder {
   }
 
   public Encoder encoder() {
-    return new Encoder(separatedString);
+    return new Encoder(SeparatedString.copy(separatedString));
   }
 
   public Decoder decoder() {
-    return new Decoder(separatedString);
+    return new Decoder(SeparatedString.copy(separatedString));
   }
 
   public Builder withBlanksTrimmed() {
