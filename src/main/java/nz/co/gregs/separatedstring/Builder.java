@@ -479,8 +479,22 @@ public class Builder {
    * @param precedingString the string to include at the very beginning of the generated separated string
    * @return a SeparatedString that will have precedingString at the beginning of the output
    */
-  public static Builder startsWith(String precedingString) {
-    return start().withPrefix(precedingString);
+  public Builder startsWith(String precedingString) {
+    return withPrefix(precedingString);
+  }
+
+  /**
+   * Creates a new SeparatedString that ends with provided value.
+   *
+   * <p>
+   * This adds a prefix to the separated string result. For instance SeparatedString.byCommas().endsWith("=LIST").addAll("1","2","3") will produce
+   * "1,2,3=LIST"
+   *
+   * @param followingString  the string to include at the very end of the generated separated string
+   * @return a Builder that will have follwingString at the end of the output
+   */
+  public Builder endsWith(String followingString) {
+    return withSuffix(followingString);
   }
 
   /**
