@@ -568,7 +568,7 @@ public class EncoderTest {
     SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.getPrefix(), is("<ul>\n"));
     String describe = encoder.describe();
-    assertThat(describe, is(""));
+    assertThat(describe, is(startsWith( "[strings:=\\[\\], formatters:={}, separator:=\n, prefix:=<ul>\n, suffix:=\n</ul>\n, wrapBefore:=<li>, wrapAfter:=</li>, escapeChar:=, useWhenEmpty:=, keyValueSeparator:=, closedLoop:=NotLoop, trimBlanks:=false, retainNulls:=false, retainNullString:=null, uniqueValuesOnly:=false, lineEnd:=, lineStart:=")));
   }
 
   @Test
