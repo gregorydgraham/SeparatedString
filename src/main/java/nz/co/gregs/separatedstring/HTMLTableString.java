@@ -31,7 +31,6 @@
 package nz.co.gregs.separatedstring;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -43,8 +42,8 @@ import java.util.function.Function;
  */
 public class HTMLTableString {
 
-  private final SeparatedString htmlTableFormatter = SeparatedStringBuilder
-          .forSeparator("")
+  private final SeparatedString htmlTableFormatter = new SeparatedString()
+          .separatedBy("")
           .withLineStartSequence("<tr>")
           .withLineEndSequence("</tr>\n")
           .withThisBeforeEachTerm("<td>")

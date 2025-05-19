@@ -34,8 +34,6 @@ package nz.co.notgregs.example;
 import nz.co.gregs.separatedstring.Builder;
 import nz.co.gregs.separatedstring.Decoder;
 import nz.co.gregs.separatedstring.Encoder;
-import nz.co.gregs.separatedstring.SeparatedString;
-import nz.co.gregs.separatedstring.SeparatedStringBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import org.junit.Test;
@@ -52,19 +50,20 @@ public class IntegrationTesting {
   
   @Test
   public void firstTest(){
-    final SeparatedString sepString = SeparatedStringBuilder
+    final Encoder sepString = Builder
             .byTabs()
             .withThisBeforeEachTerm("~\"")
             .withThisAfterEachTerm("\"~")
             .withEscapeChar("==")
             .withPrefix("START")
-            .withSuffix("END");
+            .withSuffix("END")
+            .encoder();
 // 1000,117090058,117970084,"170,9 + 58","179,7 + 84","Flensburg Weiche, W 203 - Flensburg Grenze",Flensburg-Weiche - Flensb. Gr
     sepString.addAll("1000", "117090058~\"", "117970084", "170,9 + 58", "179,7 + 84", "Flensburg Weiche, W 203 - Flensburg Grenze", "Flensburg-Weiche - Flensb. Gr", "Albert \"The Pain\" Hallsburg");
     final String encoded = sepString.encode();
     assertThat(encoded, is("START~\"1000\"~\t~\"117090058==~\"\"~\t~\"117970084\"~\t~\"170,9 + 58\"~\t~\"179,7 + 84\"~\t~\"Flensburg Weiche, W 203 - Flensburg Grenze\"~\t~\"Flensburg-Weiche - Flensb. Gr\"~\t~\"Albert \"The Pain\" Hallsburg\"~END"));
 
-    String[] parsed = sepString.parseToArray(encoded);
+    String[] parsed = sepString.decoder().decodeToArray(encoded);
     
     assertThat(parsed.length, is(8));
     assertThat(parsed[0], is("1000"));
