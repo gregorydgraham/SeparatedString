@@ -600,7 +600,7 @@ public class SeparatedString {
    * @param c a collection of String/Object mappings
    * @return this SeparatedString
    */
-  public SeparatedString addAll(Map<String, Object> c) {
+  public SeparatedString addAllObjectMap(Map<String, Object> c) {
     if (c != null && !c.isEmpty()) {
       c.forEach((key, value) -> {
         strings.add(StringEntry.of(key, value));
@@ -624,7 +624,7 @@ public class SeparatedString {
    * @param parsed a collection of String/String mappings
    * @return this SeparatedString
    */
-  public SeparatedString addAllStringMap(Map<String, String> parsed) {
+  public SeparatedString addAll(Map<String, String> parsed) {
     for (Map.Entry<String, String> entry : parsed.entrySet()) {
       add(entry.getKey(), entry.getValue());
     }
@@ -642,7 +642,7 @@ public class SeparatedString {
   @Deprecated
   public SeparatedString addAll(Map<String, Object> c, String keyValueSeparator) {
     withKeyValueSeparator(keyValueSeparator);
-    addAll(c);
+    addAllObjectMap(c);
     return this;
   }
 

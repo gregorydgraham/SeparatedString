@@ -200,7 +200,7 @@ public class EncoderTest {
   }
 
   @Test
-  public void testAddAllMap() {
+  public void testAddAllObjectMapMap() {
     Encoder encoder = Builder.start().withKeyValueSeparator("~").encoder();
     SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.getKeyValueSeparator(), is("~"));
@@ -209,12 +209,12 @@ public class EncoderTest {
     map.put("b", 2.3);
     map.put("c", Instant.EPOCH);
     map.put("d", ":>");
-    encoder.addAll(map);
+    encoder.addAllObjectMap(map);
     assertThat(encoder.encode(), is("a~1 b~2.3 c~1970-01-01T00:00:00Z d~:>"));
   }
 
   @Test
-  public void testAddAllMapStringMap() {
+  public void testAddAllMap() {
     Encoder encoder = Builder.start().withKeyValueSeparator("~").encoder();
     SeparatedString separatedString = encoder.getSeparatedString();
     assertThat(separatedString.getKeyValueSeparator(), is("~"));
@@ -223,7 +223,7 @@ public class EncoderTest {
     map.put("b", "2.3");
     map.put("c", Instant.EPOCH.toString());
     map.put("d", ":>");
-    encoder.addAllStringMap(map);
+    encoder.addAll(map);
     assertThat(encoder.encode(), is("a~1 b~2.3 c~1970-01-01T00:00:00Z d~:>"));
   }
 
@@ -452,7 +452,7 @@ public class EncoderTest {
     map.put("red", Color.RED);
     map.put("green", Color.GREEN);
     map.put("blue", Color.BLUE);
-    encoder.addAll(map);
+    encoder.addAllObjectMap(map);
     assertThat(encoder.encode(), is("redjava.awt.Color[r=255,g=0,b=0] greenjava.awt.Color[r=0,g=255,b=0] bluejava.awt.Color[r=0,g=0,b=255]!"));
     encoder.removeAll(new HashMap<>(0));
     assertThat(encoder.encode(), is("redjava.awt.Color[r=255,g=0,b=0] greenjava.awt.Color[r=0,g=255,b=0] bluejava.awt.Color[r=0,g=0,b=255]!"));

@@ -76,17 +76,17 @@ public class SeparatedStringBuilderTest {
             .setFormatFor(Instant.class, d -> DATETIME_FORMAT.format(d))
             .withEscapeChar("!");
     
-    String value = extrasEncoder.addAll(new HashMap<>(0)).encode();
+    String value = extrasEncoder.addAllObjectMap(new HashMap<>(0)).encode();
     assertThat(value, is(""));
     final HashMap<String, Object> hashMap = new HashMap<>(0);
     hashMap.put("first", "1");
     hashMap.put("second", 2);
     hashMap.put("third", Instant.ofEpochMilli(0l));
-    value = extrasEncoder.addAll(hashMap).encode();
+    value = extrasEncoder.addAllObjectMap(hashMap).encode();
     assertThat(value, is("third=1970-01-01 12:00;first=1;second=2"));
     extrasEncoder.removeAll(hashMap);
     Map<String, String> parsed = extrasEncoder.parseToMap(value);
-    extrasEncoder.addAllStringMap(parsed);
+    extrasEncoder.addAll(parsed);
     assertThat(extrasEncoder.encode(), is("third=1970-01-01 12:00;first=1;second=2"));
     
 
@@ -102,7 +102,7 @@ public class SeparatedStringBuilderTest {
             .setFormatFor(Instant.class, d -> DATETIME_FORMAT.format(d))
             .withEscapeChar("!");
     
-    String value = extrasEncoder.addAll(new HashMap<>(0)).encode();
+    String value = extrasEncoder.addAllObjectMap(new HashMap<>(0)).encode();
     assertThat(value, is(""));
     final HashMap<String, Object> hashMap = new HashMap<>(0);
     hashMap.put("first", "1");
@@ -111,7 +111,7 @@ public class SeparatedStringBuilderTest {
     value = extrasEncoder.addAll(hashMap,"=").encode();
     assertThat(value, is("third=1970-01-01 12:00;first=1;second=2"));
     extrasEncoder.removeAll(hashMap);
-    extrasEncoder.addAllStringMap(extrasEncoder.parseToMap(value));
+    extrasEncoder.addAll(extrasEncoder.parseToMap(value));
     assertThat(extrasEncoder.encode(), is("third=1970-01-01 12:00;first=1;second=2"));
     
 
@@ -129,7 +129,7 @@ public class SeparatedStringBuilderTest {
             .forSeparator(";")
             .withKeyValueSeparator("=")
             .withEscapeChar("!");
-    String extrasEncoded = extrasEncoder.addAll(new HashMap<>(0)).encode();
+    String extrasEncoded = extrasEncoder.addAllObjectMap(new HashMap<>(0)).encode();
 
     SeparatedString mainEncoder = SeparatedStringBuilder.forSeparator(", ").withEscapeChar("\\").withPrefix("DATABASECONNECTIONSETTINGS: ");
     mainEncoder.addAll(

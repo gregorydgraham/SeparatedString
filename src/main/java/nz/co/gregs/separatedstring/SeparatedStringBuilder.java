@@ -142,7 +142,7 @@ public class SeparatedStringBuilder {
    */
   @Deprecated
   public static SeparatedString of(Map<String, Object> nameValuePairs, String nameValueSeparator) {
-    return new SeparatedString().withKeyValueSeparator(nameValueSeparator).addAll(nameValuePairs);
+    return new SeparatedString().withKeyValueSeparator(nameValueSeparator).addAllObjectMap(nameValuePairs);
   }
 
   /**

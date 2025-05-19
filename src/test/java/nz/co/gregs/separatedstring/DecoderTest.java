@@ -294,7 +294,7 @@ public class DecoderTest {
     map.put("b", 2.3);
     map.put("c", Instant.EPOCH);
     map.put("d", ":>");
-    encoder.addAll(map);
+    encoder.addAllObjectMap(map);
     assertThat(encoder.encode(), is("a~1 b~2.3 c~1970-01-01T00:00:00Z d~:>"));
     
     Decoder decoder = encoder.decoder();

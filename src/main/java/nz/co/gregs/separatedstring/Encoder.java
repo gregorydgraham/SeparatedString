@@ -87,13 +87,13 @@ public class Encoder {
     return this;
   }
 
-  public Encoder addAll(Map<String, Object> c) {
-    separatedString.addAll(c);
+  public Encoder addAllObjectMap(Map<String, Object> c) {
+    separatedString.addAllObjectMap(c);
     return this;
   }
 
-  public Encoder addAllStringMap(Map<String, String> c) {
-    separatedString.addAllStringMap(c);
+  public Encoder addAll(Map<String, String> c) {
+    separatedString.addAll(c);
     return this;
   }
 
