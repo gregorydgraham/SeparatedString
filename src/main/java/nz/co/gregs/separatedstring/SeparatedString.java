@@ -30,9 +30,12 @@
  */
 package nz.co.gregs.separatedstring;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import nz.co.gregs.separatedstring.util.MapList;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import nz.co.gregs.separatedstring.util.StringEntry;
 
@@ -104,6 +107,28 @@ public class SeparatedString {
     newVersion.lineEnd = sepString.lineEnd;
     newVersion.lineStart = sepString.lineStart;
     return newVersion;
+  }
+  
+  protected String describe(){
+    final Class<? extends SeparatedString> aClass = getClass();
+    Field[] fields = aClass.getDeclaredFields();
+    Encoder encoder = Builder
+            .forSeparator(", ")
+            .withKeyValueSeparator(":=")
+            .withEscapeChar("\\")
+            .withPrefix("[")
+            .withSuffix("]")
+            .encoder();
+    for (Field field : fields) {
+      try {
+        field.setAccessible(true);
+        encoder.add(field.getName(), field.get(this).toString());
+      } catch (IllegalArgumentException | IllegalAccessException ex) {
+        System.out.println("WHOOPS: "+field.getName()+" threw "+ex.getLocalizedMessage());
+        Logger.getLogger(Encoder.class.getName()).log(Level.SEVERE, null, ex);
+      }
+    }
+    return encoder.encode();
   }
 
   public enum ClosedLoop {

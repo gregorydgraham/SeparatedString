@@ -436,8 +436,8 @@ public class EncoderTest {
 
     encoder.containing(Color.RED, Color.GREEN, Color.BLUE);
     assertThat(encoder.encode(), is("~java.awt.Color[r=255,g=0,b=0] java.awt.Color[r=0,g=255,b=0] java.awt.Color[r=0,g=0,b=255]"));
-    encoder.removeAll(List.of("java.awt.Color[r=255,g=0,b=0]", "java.awt.Color[r=0,g=255,b=0]","java.awt.Color[r=0,g=0,b=255]"));
-    assertThat(encoder.encode(),is(""));
+    encoder.removeAll(List.of("java.awt.Color[r=255,g=0,b=0]", "java.awt.Color[r=0,g=255,b=0]", "java.awt.Color[r=0,g=0,b=255]"));
+    assertThat(encoder.encode(), is(""));
   }
 
   @Test
@@ -446,7 +446,7 @@ public class EncoderTest {
     builder.withSuffix("!");
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.getSuffix(), is("!"));
-    
+
     Encoder encoder = builder.encoder();
     Map<String, Object> map = new HashMap<>();
     map.put("red", Color.RED);
@@ -470,7 +470,7 @@ public class EncoderTest {
     builder.withNullsRetained(true);
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.isRetainingNulls(), is(true));
-    
+
     Encoder encoder = builder.encoder();
     encoder.addAll("red", "green", "blue");
     assertThat(encoder.encode(), is("red green blue"));
@@ -557,9 +557,18 @@ public class EncoderTest {
 
   @Test
   public void testStartsWith() {
-    Builder builder = Builder.startsWith("~");
+    Builder builder = Builder.go().startsWith("~");
     SeparatedString separatedString = builder.getSeparatedString();
     assertThat(separatedString.getPrefix(), is("~"));
+  }
+
+  @Test
+  public void testDescribe() {
+    Encoder encoder = Builder.htmlUnorderedList().encoder();
+    SeparatedString separatedString = encoder.getSeparatedString();
+    assertThat(separatedString.getPrefix(), is("<ul>\n"));
+    String describe = encoder.describe();
+    assertThat(describe, is(""));
   }
 
   @Test

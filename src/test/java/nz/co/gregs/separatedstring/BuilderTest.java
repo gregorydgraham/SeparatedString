@@ -31,7 +31,6 @@
 package nz.co.gregs.separatedstring;
 
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
@@ -326,7 +325,7 @@ public class BuilderTest {
 
   @Test
   public void testStartsWith() {
-    Builder builder = Builder.startsWith("~");
+    Builder builder = Builder.go().startsWith("~");
     SeparatedString separatedString = builder.getSeparatedString();
     MatcherAssert.assertThat(separatedString.getPrefix(), is("~"));
   }
