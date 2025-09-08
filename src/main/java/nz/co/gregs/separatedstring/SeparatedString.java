@@ -83,6 +83,24 @@ public class SeparatedString {
   private String lineEnd = "";
   private String lineStart = "";
 
+  /**
+   * Start creating your SeparatedString with a Builder, then turn it into an Encoder or Decoder to process Objects and String.
+   *
+   * @return a builder for making a SeparatedString.
+   */
+  public static Builder getBuilder() {
+    return new Builder();
+  }
+
+  /**
+   * Start creating your SeparatedString with a Builder, then turn it into an Encoder or Decoder to process Objects and String.
+   *
+   * @return a builder for making a SeparatedString.
+   */
+  public static Builder builder() {
+    return new Builder();
+  }
+
   private static SeparatedString duplicateSettingsOf(SeparatedString sepString) {
     SeparatedString newVersion = new SeparatedString();
     for (StringEntry entry : sepString.strings) {
@@ -108,8 +126,8 @@ public class SeparatedString {
     newVersion.lineStart = sepString.lineStart;
     return newVersion;
   }
-  
-  protected String describe(){
+
+  protected String describe() {
     final Class<? extends SeparatedString> aClass = getClass();
     Field[] fields = aClass.getDeclaredFields();
     Encoder encoder = Builder
@@ -124,7 +142,7 @@ public class SeparatedString {
         field.setAccessible(true);
         encoder.add(field.getName(), field.get(this).toString());
       } catch (IllegalArgumentException | IllegalAccessException ex) {
-        System.out.println("WHOOPS: "+field.getName()+" threw "+ex.getLocalizedMessage());
+        System.out.println("WHOOPS: " + field.getName() + " threw " + ex.getLocalizedMessage());
         Logger.getLogger(Encoder.class.getName()).log(Level.SEVERE, null, ex);
       }
     }
