@@ -401,8 +401,8 @@ public class Builder {
   /**
    * The character sequence that should be at the beginning of every line, probably nothing.
    * 
-   * @param lineStartSequence
-   * @return the sequence used at the beginning of a line
+   * @param lineStartSequence the sequence used at the beginning of a line 
+   * @return the builder
    */
   public Builder withLineStartSequence(String lineStartSequence) {
     separatedString.withLineStartSequence(lineStartSequence);
@@ -412,8 +412,8 @@ public class Builder {
   /**
    * The character sequence that should be at the end of every line, probably \n.
    * 
-   * @param lineEndSequence
-   * @return the sequence used at the end of a line
+   * @param lineEndSequence the sequence used at the end of a line
+   * @return the builder
    */
   public Builder withLineEndSequence(String lineEndSequence) {
     separatedString.withLineEndSequence(lineEndSequence);
