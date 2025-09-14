@@ -30,13 +30,10 @@
  */
 package nz.co.gregs.separatedstring;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -60,6 +57,10 @@ public class Encoder {
 
   public String encode() {
     return separatedString.encode();
+  }
+
+  public String encodeOr(String valueIfEmpty) {
+    return separatedString.isEmpty()?valueIfEmpty:separatedString.encode();
   }
 
   @Override

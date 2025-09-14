@@ -177,6 +177,15 @@ public class EncoderTest {
   }
 
   @Test
+  public void testEncodeOr() {
+    Encoder encoder = Builder.start().withKeyValueSeparator("=").encoder();
+    assertThat(encoder.encodeOr("this is empty"), is("this is empty"));
+    encoder.add("a", "1");
+    encoder.add("b", "2");
+    assertThat(encoder.encodeOr("this is empty"), is("a=1 b=2"));
+  }
+
+  @Test
   public void testAddAll() {
     Encoder encoder = Builder.start().separatedBy("~").encoder();
     SeparatedString separatedString = encoder.getSeparatedString();
