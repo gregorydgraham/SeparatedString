@@ -253,9 +253,9 @@ public class SeparatedStringTest {
   }
 
   @Test
-  public void testUseWhenEmpty() {
+  public void testWithEmptyStringAs() {
     Builder builder = SeparatedString.builder();
-    builder.useWhenEmpty("~");
+    builder.withEmptyStringAs("~");
     SeparatedString separatedString = builder.getSeparatedString();
     MatcherAssert.assertThat(separatedString.getEmptyValue(), is("~"));
   }

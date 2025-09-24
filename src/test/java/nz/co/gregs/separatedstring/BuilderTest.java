@@ -253,9 +253,9 @@ public class BuilderTest {
   }
 
   @Test
-  public void testUseWhenEmpty() {
+  public void testWithEmptyStringAs() {
     Builder builder = Builder.start();
-    builder.useWhenEmpty("~");
+    builder.withEmptyStringAs("~");
     SeparatedString separatedString = builder.getSeparatedString();
     MatcherAssert.assertThat(separatedString.getEmptyValue(), is("~"));
   }

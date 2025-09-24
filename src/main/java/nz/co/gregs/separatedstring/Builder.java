@@ -393,6 +393,19 @@ public class Builder {
    * @param string a string to use instead of returning an empty string while encoding.
    * @return this SeparatedString
    */
+  public final Builder withEmptyStringAs(String string) {
+    separatedString.useWhenEmpty(string);
+    return this;
+  }
+
+  /**
+   * Provides a value to be used whenever the encoded result would be empty.
+   *
+   * @param string a string to use instead of returning an empty string while encoding.
+   * @return this SeparatedString
+   * @deprecated use {@link #withEmptyStringAs(java.lang.String) } instead.
+   */
+  @Deprecated
   public final Builder useWhenEmpty(String string) {
     separatedString.useWhenEmpty(string);
     return this;
